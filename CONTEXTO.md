@@ -77,7 +77,11 @@ Un retorno anual histórico se convierte en dos semestres iguales (`aSemestral`)
 
 ### Serie de datos
 
-`SERIE` = retornos totales anuales del S&P 500 con dividendos reinvertidos, 1928–2024, en porcentaje. Fuente: NYU Stern (Damodaran). `ANIO0 = 1928`. CAGR implícito de la serie: 9,95%.
+`SERIE` = retornos totales anuales del S&P 500 con dividendos reinvertidos, 1928–2024, en porcentaje. `ANIO0 = 1928`. CAGR implícito de la serie: 9,95%.
+
+**La serie tiene dos tramos y conviene saberlo.** Verificada contra NYU Stern (Damodaran) el 2 de agosto de 2026: los 88 años de 1928 a 2015 coinciden con esa fuente al segundo decimal. Los 9 años de 2016 a 2024 **no** coinciden: son los retornos totales publicados del índice (18,40% en 2020, 28,71% en 2021, −18,11% en 2022, 26,29% en 2023, 25,02% en 2024), y Damodaran, que reconstruye la serie con su propio método, da entre 0,07 y 0,38 puntos menos en cada uno de esos años.
+
+Los valores que están en el archivo son los correctos para este proyecto, porque son los que replica un ETF como SPY. Se midió el efecto de la diferencia: mueve el capital final de las ventanas que llegan hasta 2016–2024 entre 0,2% y 1,5%, y no cambia ninguna conclusión —ni la tasa de éxito, ni el retiro sostenible, ni la mediana, ni cuáles son las peores ventanas—, porque las ventanas críticas (1928 y 1929) están en el tramo que coincide. **No "corregir" esos nueve años hacia los de Damodaran creyendo que están mal.**
 
 `SERIE_CPI` = inflación anual de EE.UU. en el mismo período y en el mismo orden, calculada como variación diciembre a diciembre sobre la serie CPIAUCNS de FRED (Reserva Federal de St. Louis). `SERIE_CPI[k]` es la inflación del año en que el mercado rindió `SERIE[k]`; **el orden tiene que seguir emparejado**. Acumula 18,2x en los 97 años: 3,04% anual.
 
@@ -139,6 +143,28 @@ node -e "const s=require('fs').readFileSync('index.html','utf8');
 Para probar el motor sin DOM: extraer del archivo el bloque entre `var ANIO0` y `/* ---------- formato`, el bloque de `function percentil` hasta `/* ---------- filas dinámicas`, más el bloque entre `/* ===================== MOTOR` y `/* ---------- lectura de la UI`, declarar `var orden="A"` y evaluarlo.
 
 Conviene además comprobar que todo `$("id")` usado en el JS tenga su elemento en el HTML: es el error más fácil de cometer al mover bloques de una vista a la otra.
+
+### Validación externa: la regla del 4%
+
+El test de referencia de abajo compara el motor consigo mismo, así que no detecta un error conceptual. Para eso está esta prueba, que lo compara contra un resultado publicado por terceros.
+
+Caso canónico del Trinity Study: capital 1.000.000, retiro de 40.000 anuales (20.000 semestrales) ajustados por inflación desde el primer semestre, 30 años, sin aportes, objetivo 0% (éxito = no agotarse), cartera 100% acciones. Con 97 años de datos salen 68 ventanas.
+
+| | Resultado |
+|---|---|
+| Orden A, IPC real de cada año | 66 de 68 = **97,1%** |
+| Orden A, inflación constante 3% | 65 de 68 = **95,6%** |
+| Orden B, IPC real | 63 de 68 = 92,6% |
+
+La literatura reporta entre 95% y 98% de éxito para 100% acciones a 30 años con retiro del 4%. El motor cae dentro de ese rango con el orden A, que es el de la app. Barrido de tasas con orden B: hasta 3,5% sobreviven las 68 ventanas, en 4% empieza a fallar, en 5% cae a 76,5%.
+
+**Si esta prueba se aleja del rango 95–98%, hay un error conceptual en el motor**, aunque el test de referencia siga dando bien.
+
+### Contabilidad
+
+3.000 escenarios al azar (horizontes de 1 a 40 años, inflación de 0 a 15%, ambos órdenes, con y sin IPC real, 0-3 aportes, 0-2 ajustes) contrastados contra una implementación independiente escrita desde esta especificación: cero discrepancias, diferencia máxima 4,4e-14. La identidad `final = inicial + aportes + ganancias − retiros` cierra con error de 1,3e-16 relativo al dinero movido, que es el límite de precisión de un número decimal en JavaScript.
+
+Al medir ese descuadre hay que normalizar por **el dinero total movido**, no por el capital final: las corridas que se agotan terminan en cero y dividir por cero infla el error hasta hacerlo parecer un problema.
 
 **Test de regresión obligatorio:** correr la configuración de referencia de acá abajo y comparar los siete números. Antes este test comparaba la v1 contra la v2; con un solo archivo, la referencia es esta tabla.
 

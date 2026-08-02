@@ -33,7 +33,7 @@ Es un archivo HTML autocontenido, sin dependencias, sin CDN y sin compilación. 
 
 ## Datos
 
-- **Retornos:** S&P 500 con dividendos reinvertidos, retornos totales anuales 1928–2024. Fuente: NYU Stern (Damodaran).
+- **Retornos:** S&P 500 con dividendos reinvertidos, retornos totales anuales 1928–2024. Los años 1928–2015 coinciden exactamente con la serie de NYU Stern (Damodaran); 2016–2024 son los retornos totales publicados del índice, que difieren de la reconstrucción de Damodaran en menos de 0,4 puntos por año.
 - **Inflación:** IPC de EE.UU., variación diciembre a diciembre, mismo período. Calculada sobre la serie `CPIAUCNS` de FRED (Reserva Federal de St. Louis).
 
 ## Limitaciones
