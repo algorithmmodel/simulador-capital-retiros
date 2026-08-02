@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Simulador de capital y retiros</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEuUlEQVRIDa2We1DUVRTHv+e37LIuICvxkGWlTUiNFRB0GEsH+SNgXUFJbJpRmsZeYqU2ozbTYxacsdJCAiuRyv4wpsbGbGoaxiaVROLhMJpaCUEIIqxARCjSymNP9+6PcgZ6iOyd3965e3/39/mecx/nXLjdbmauOnUqMzMDXip2+/LKkycFVhSIX35+vkaj8RJ8DKMoisPhkAJ1tbUKKV6kU4yNkjcKIBHV1NRoOjs7fm5q8o6Aj57sDuTsgxuo/0Qw2y+3e4csKeYFtOVblLB8tlYLB1S0dyaHjCbKLuToZAy5MQpMnwlfP28K8O9O3menhm+gVUgDMkbAL0gICC98VJ0p14wZkWxZDLEZT7yDYRf0gVNmjgM8UopSxu4eBIbLN56dKTzwzhrAnICkHDkjlfvQ75QCLHaSLN4QUHyw8g0EGNDRiIoilevVetnzeJfx9hBibOO4Y1t1XO/k/s5eioLrVMJk3zHxw6kKUPBsOFrwHtNjH0NM1IQyNYFAM7afxftMuV/B138CXHZMQSA4il6QdDxxGPqAf6TfuQBFpSCvTcQceqgQPrp/o9+RgIiXD75ERaN4rYsWrv0PtPpqclNE99lp21nsZco5iCDL/9Jve8A0IyWupc3focBFG8oRlXzbX8qBE50gaH2hN8IYiYh4il6GyEXsHsXFo6gvQ8fZSdFvCdCCNWyaD0VLOgPrAqATsZBwoxtXL6ClEs4fJ8tVxwvz//JAq5cBdm4ahVm5vxMXjqD/yhjUlABzHHpacOnUWI84U3PTEJGAoRtoOgHneXEOyJrFGnHWCCODaK1FX9vfGp6GXzCtK2NrusxHOlBXKz7M5o4zUDS0qZpjkqi1mQviMPyHsIPWlnFiBkYgo//Nm/j0GWo8Ckcb+/qAZYqhvm7+YA1apEFj0ZTsOzkhHcf3YHcMHdrCYRZkvimVQ+exOZ56ejkkCncvFh2Uso2TMqj6IF6PoZJMGuzFA7mYNgM8SufLsSuODj6FwFDcv0F+PpbRxOTEZpHzMpe/ghEXd10k5w/CFFmsq+Saf7GVsoo5djWaKxCXRX39/OV2DHRzfwftt2FkSEZ/VuAaQG8b/MNlLlCEd7J4IpQ+gA2BdOV7QVd7ufmEbIhB8WvoagPqDiDpcbJm4NhOGGbgeregY24qnvycXYMQThx6GkMDHL8a89JZp8dAD50+oJromSLXNRrogwheOoMqQEs305JnEZEIUyxPN3HucQ66h++ywBTPv3UgIAz+Ieg8h8PP0a+/wGiRpmi0aK+n+o9g8KXK/dx4TEUpq1athOsazn3GYWZkFsKyhNJ28KPFmLUI96ZC50OXT9NAF7XVyR03J53OlME4nbJLKSiKBq9zUDSGhz0sLZwNfGQTtf2EpPXwDxWdy2021NXVKURilWj9EbzFKGYUiQj8NYncvaUeDid8PcFSo6UXm+jlS2QIoodLUeiWI/e4aWMF8rspOoV2DWJdmYCKYy8TnO1VYY+4Onouv3n5GnU3idxtXYHIJMjLDcGciJA5qqeyDo7CrIXQeMLnzPlyZMQCaA0wxUkjRFsNUOKUhFo14bF5eXme27V6fa+qsqWn3WJNrbXCllp1skLQ2c1/Al0yo1EPREvlAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CAGR">
+<meta name="theme-color" content="#FFFFFF">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#111111; --ink-2:#3F3F46;
+    --surface:#F4F4F5; --line:#D4D4D8;
+    --azul:#1D4ED8; --naranja:#C2410C; --verde:#15803D; --rojo:#B91C1C;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:17px;line-height:1.45;
+    padding:0 16px calc(40px + env(safe-area-inset-bottom));
+    max-width:760px;margin:0 auto;
+  }
+  h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:22px 0 4px}
+  .sub{color:var(--ink-2);font-size:15px;margin:0 0 22px}
+  h2{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin:0 0 14px}
+  section.card{background:var(--surface);border:2px solid var(--line);
+    border-radius:var(--radius);padding:18px 16px;margin-bottom:18px}
+  label{display:block;font-size:15px;font-weight:600;margin:0 0 6px}
+  .hint{font-size:14px;color:var(--ink-2);font-weight:400;margin-top:5px}
+  input[type=number],input[type=text],select{
+    width:100%;height:48px;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:0 12px;color:var(--ink);background:#FFFFFF;
+    border:2px solid var(--line);border-radius:8px;appearance:none;-webkit-appearance:none}
+  input:focus,select:focus,button:focus-visible{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px var(--azul)}
+  .field{margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;align-items:stretch}
+  .grid2>.field,.grid3>div{display:flex;flex-direction:column}
+  .grid2>.field input,.grid2>.field select,.grid3>div input,.grid3>div select{margin-top:auto}
+  button{font-family:inherit;font-size:17px;font-weight:700;min-height:52px;width:100%;
+    border-radius:8px;border:2px solid var(--azul);background:var(--azul);color:#FFFFFF;
+    padding:0 16px;cursor:pointer}
+  button.ghost{background:#FFFFFF;color:var(--azul)}
+  button.danger{background:#FFFFFF;color:var(--rojo);border-color:var(--rojo);min-height:48px;font-size:15px}
+  button.small{min-height:48px;font-size:16px}
+  .rowbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .filas{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+  .fila{background:#FFFFFF;border:2px solid var(--line);border-radius:8px;padding:12px}
+  .fila .grid3 label{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2)}
+  .fila .quitar{margin-top:10px}
+  .empty{background:#FFFFFF;border:2px dashed var(--line);border-radius:8px;
+    padding:14px;font-size:15px;color:var(--ink-2);margin-bottom:12px}
+  .sliderwrap{display:grid;grid-template-columns:56px 1fr 56px;gap:10px;align-items:center}
+  .sliderwrap button{min-height:52px;font-size:26px;padding:0}
+  input[type=range]{width:100%;height:48px;background:transparent;-webkit-appearance:none;appearance:none;
+    touch-action:none;margin:4px 0 0;padding:0}
+  input[type=range]::-webkit-slider-runnable-track{height:14px;border-radius:7px;background:#FFF;border:2px solid var(--line)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:34px;height:34px;
+    border-radius:50%;background:var(--azul);border:3px solid #FFF;box-shadow:0 0 0 2px var(--azul);margin-top:-13px}
+  input[type=range]::-moz-range-track{height:14px;border-radius:7px;background:#FFF;border:2px solid var(--line)}
+  input[type=range]::-moz-range-thumb{width:34px;height:34px;border-radius:50%;border:3px solid #FFF;
+    background:var(--azul);box-shadow:0 0 0 2px var(--azul)}
+  input#tNum{height:56px;font-size:30px;font-weight:800;text-align:center;letter-spacing:-.02em;padding:0 4px}
+  .segment{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--line);
+    border-radius:8px;overflow:hidden;background:#FFFFFF}
+  .segment button{border:none;border-radius:0;background:#FFF;color:var(--ink);
+    font-size:15px;font-weight:700;min-height:56px;line-height:1.2;padding:0 8px}
+  .segment button[aria-pressed=true]{background:var(--azul);color:#FFF}
+  .segment button+button{border-left:2px solid var(--line)}
+  .aviso{border:2px solid var(--rojo);border-radius:8px;background:#FFF;padding:12px 14px;
+    margin-bottom:16px;font-size:15px;font-weight:600;color:var(--rojo)}
+  .aviso ul{margin:8px 0 0;padding-left:20px;font-weight:400}
+
+  .estado{border:3px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:18px;background:#FFF}
+  .estado .tag{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  .estado .txt{font-size:21px;font-weight:800;margin-top:4px;line-height:1.25}
+  .estado.ok{border-color:var(--verde)} .estado.ok .tag,.estado.ok .txt{color:var(--verde)}
+  .estado.warn{border-color:var(--naranja)} .estado.warn .tag,.estado.warn .txt{color:var(--naranja)}
+  .estado.bad{border-color:var(--rojo)} .estado.bad .tag,.estado.bad .txt{color:var(--rojo)}
+  .estado .det2{font-size:16px;font-weight:600;color:var(--ink-2);margin-top:9px;line-height:1.35}
+
+  .kpi{background:#FFF;border:2px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  .kpi .k{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+  .kpi .v{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:4px}
+  .kpi .n{font-size:15px;color:var(--ink-2);margin-top:6px}
+  .kpi.azul{border-color:var(--azul)} .kpi.azul .v{color:var(--azul)}
+  .kpi.naranja{border-color:var(--naranja)} .kpi.naranja .v{color:var(--naranja)}
+  .kpi.verde{border-color:var(--verde)} .kpi.verde .v{color:var(--verde)}
+
+  .modo{background:#FFF;border:2px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
+  .modo .nom{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .modo .det{font-size:14px;color:var(--ink-2);margin-top:2px}
+  .modo .cifras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .modo .cifras div{border-top:2px solid var(--line);padding-top:8px}
+  .modo .cifras .et{font-size:13px;color:var(--ink-2);font-weight:600}
+  .modo .cifras .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+  .modo.d{border-color:var(--line)} .modo.d .nom{color:var(--ink)}
+  .modo.h{border-color:var(--azul)} .modo.h .nom{color:var(--azul)}
+  .modo.m{border-color:var(--naranja)} .modo.m .nom{color:var(--naranja)}
+
+  dl.datos{margin:0;border-top:2px solid var(--line)}
+  dl.datos div{display:flex;justify-content:space-between;gap:12px;padding:12px 2px;border-bottom:2px solid var(--line)}
+  dl.datos dt{margin:0;font-size:16px;color:var(--ink-2)}
+  dl.datos dd{margin:0;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+
+  canvas{width:100%;display:block;background:#FFF;border:2px solid var(--line);border-radius:8px}
+  .leyenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:15px;font-weight:600}
+  .leyenda i{display:inline-block;width:26px;height:0;border-top-width:4px;vertical-align:middle;margin-right:7px}
+  .lg1{border-top-style:solid;border-top-color:var(--azul)}
+  .lg2{border-top-style:dashed;border-top-color:var(--rojo)}
+  .lg3{border-top-style:dotted;border-top-color:var(--verde)}
+  .lg4{border-top-style:solid;border-top-color:#71717A}
+  .lg5{border-top-style:dashed;border-top-color:var(--naranja)}
+
+  details{background:#FFF;border:2px solid var(--line);border-radius:8px}
+  summary{padding:16px;font-size:17px;font-weight:700;cursor:pointer;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"  ▾"} details[open] summary::after{content:"  ▴"}
+  .tablewrap{overflow-x:auto;padding:0 12px 12px}
+  table{border-collapse:collapse;width:100%;font-size:15px}
+  th,td{padding:9px 8px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:2px solid var(--line);white-space:nowrap}
+  th{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2)}
+  th:first-child,td:first-child{text-align:left}
+  tr.agot td{color:var(--rojo);font-weight:700}
+  tr.malo td:first-child{color:var(--rojo);font-weight:800}
+
+  .nota{font-size:14px;color:var(--ink-2);margin-top:22px;border-top:2px solid var(--line);padding-top:14px}
+  .hidden{display:none !important}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  @media print{ .noprint{display:none !important} }
+</style>
+</head>
+<body>
+
+<div id="vistaCarga">
+  <h1>Simulador de capital y retiros</h1>
+  <p class="sub">Corre tres modelos con los mismos datos: CAGR constante, secuencias históricas reales y bootstrap por bloques.</p>
+
+  <div id="avisos"></div>
+
+  <section class="card hidden" id="cardComp2">
+    <h2>Escenarios guardados</h2>
+    <div class="tablewrap" style="padding:0">
+      <table id="tablaComp2"><thead></thead><tbody></tbody></table>
+    </div>
+    <button class="danger small borrarComp" type="button" style="margin-top:14px">Borrar todos los escenarios</button>
+  </section>
+
+  <section class="card">
+    <h2>Capital y horizonte</h2>
+    <div class="field">
+      <label for="capital">Capital inicial (USD)</label>
+      <input id="capital" type="number" inputmode="decimal" value="100000" min="0" step="1000">
+    </div>
+    <div class="field">
+      <label for="anios">Horizonte (años)</label>
+      <input id="anios" type="number" inputmode="decimal" value="20" min="1" step="1">
+      <p class="hint" id="hintAnios"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Retorno e inflación</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="cagr">CAGR nominal anual %</label>
+        <input id="cagr" type="number" inputmode="decimal" value="9" step="0.1">
+      </div>
+      <div class="field">
+        <label for="infl">Inflación anual %</label>
+        <input id="infl" type="number" inputmode="decimal" value="3" min="0" step="0.1">
+      </div>
+    </div>
+    <p class="hint" id="hintReal"></p>
+    <p class="hint">El CAGR solo alimenta el modelo determinístico. Los otros dos usan la serie histórica del S&amp;P 500.</p>
+
+    <h2 style="margin-top:22px">Inflación en el backtest y el Monte Carlo</h2>
+    <div class="segment" role="group">
+      <button type="button" id="inflFija" aria-pressed="true">La que cargué arriba</button>
+      <button type="button" id="inflReal" aria-pressed="false">La real de cada año</button>
+    </div>
+    <p class="hint">Con la segunda opción, cada ventana histórica usa el IPC de esos mismos años: la que arranca en 1966 combina retornos flojos con inflación alta, que es como ocurrió. El modelo de CAGR fijo usa siempre la inflación que cargó arriba.</p>
+  </section>
+
+  <section class="card">
+    <h2>Aportes de capital nuevo</h2>
+    <div class="filas" id="filasAportes"></div>
+    <button class="ghost small" type="button" id="addAporte">Agregar aporte</button>
+  </section>
+
+  <section class="card">
+    <h2>Retiros</h2>
+    <div class="field">
+      <label for="retMonto">Retiro semestral inicial (USD)</label>
+      <input id="retMonto" type="number" inputmode="decimal" value="2400" min="0" step="500">
+      <p class="hint">Se ajusta por inflación cada semestre desde el primer retiro.</p>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="retAnio">Año de inicio</label>
+        <input id="retAnio" type="number" inputmode="numeric" value="5" min="1" step="1"></div>
+      <div class="field"><label for="retSem">Semestre de inicio</label>
+        <select id="retSem"><option value="1">1</option><option value="2">2</option></select></div>
+    </div>
+    <h2 style="margin-top:22px">Ajustes puntuales del retiro</h2>
+    <div class="filas" id="filasAjustes"></div>
+    <button class="ghost small" type="button" id="addAjuste">Agregar ajuste</button>
+  </section>
+
+  <section class="card">
+    <h2>Capital final objetivo</h2>
+    <div class="sliderwrap">
+      <button class="ghost" type="button" id="tMenos" aria-label="Bajar objetivo 5 por ciento">−</button>
+      <div>
+        <label class="sr" for="tNum">Porcentaje del capital invertido a preservar</label>
+        <input id="tNum" type="number" inputmode="numeric" min="0" max="100" step="5" value="100">
+      </div>
+      <button class="ghost" type="button" id="tMas" aria-label="Subir objetivo 5 por ciento">+</button>
+    </div>
+    <input type="range" id="target" min="0" max="100" step="5" value="100"
+           aria-label="Porcentaje del capital invertido a preservar">
+    <p class="target-read hint" id="tRead"></p>
+  </section>
+
+  <section class="card">
+    <h2>Parámetros de la simulación</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="nivel">Nivel de éxito exigido %</label>
+        <input id="nivel" type="number" inputmode="numeric" value="90" min="50" max="100" step="5">
+      </div>
+      <div class="field">
+        <label for="corridas">Corridas Monte Carlo</label>
+        <input id="corridas" type="number" inputmode="numeric" value="1000" min="200" max="5000" step="100">
+      </div>
+    </div>
+    <div class="field">
+      <label for="bloque">Tamaño del bloque (años)</label>
+      <input id="bloque" type="number" inputmode="numeric" value="5" min="1" max="15" step="1">
+      <p class="hint">El bootstrap toma tramos consecutivos de la historia en vez de años sueltos, para conservar las rachas buenas y malas.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Orden dentro del semestre</h2>
+    <div class="segment" role="group">
+      <button type="button" id="ordA" aria-pressed="true">Aporte → crecimiento → retiro</button>
+      <button type="button" id="ordB" aria-pressed="false">Aporte → retiro → crecimiento</button>
+    </div>
+  </section>
+
+  <button type="button" id="calcular">Calcular los tres modelos</button>
+
+  <p class="nota">Serie de retornos totales del S&amp;P 500 con dividendos reinvertidos, 1928–2024 (NYU Stern). Datos y reglas de planificación de uso general. No es asesoramiento financiero. El rendimiento pasado no predice el futuro.</p>
+</div>
+
+<div id="vistaRes" class="hidden">
+  <h1>Resultado · tres modelos</h1>
+  <p class="sub" id="resSub"></p>
+
+  <div id="estado" class="estado"></div>
+
+  <section class="card">
+    <h2>Retiro sostenible según el modelo</h2>
+    <div id="modos"></div>
+    <p class="hint" id="modosNota"></p>
+    <div class="kpi azul" style="margin:14px 0 0">
+      <div class="k">Retiro semestral sostenible (CAGR fijo)</div>
+      <div class="v" id="kSost"></div>
+      <div class="n" id="kSostN"></div>
+    </div>
+  </section>
+
+  <div class="kpi verde">
+    <div class="k">Su plan: probabilidad de éxito</div>
+    <div class="v" id="kExito"></div>
+    <div class="n" id="kExitoN"></div>
+  </div>
+
+  <div class="kpi">
+    <div class="k">Capital final nominal</div>
+    <div class="v" id="kNom"></div>
+    <div class="n" id="kNomN"></div>
+  </div>
+
+  <div class="kpi naranja">
+    <div class="k">Capital final real (poder de compra de hoy)</div>
+    <div class="v" id="kReal"></div>
+    <div class="n" id="kRealN"></div>
+  </div>
+
+  <section class="card">
+    <h2>Evolución del capital (CAGR fijo)</h2>
+    <canvas id="chartCap" height="300"></canvas>
+    <div class="leyenda">
+      <span><i class="lg1"></i>Nominal</span>
+      <span><i class="lg5"></i>Real (poder de compra de hoy)</span>
+    </div>
+    <p class="hint">Su plan tal como lo cargó, con el mercado rindiendo el CAGR fijo todos los años.</p>
+  </section>
+
+  <section class="card">
+    <h2>Abanico de resultados históricos</h2>
+    <canvas id="chartFan" height="300"></canvas>
+    <div class="leyenda">
+      <span><i class="lg3"></i>Mejor 10%</span>
+      <span><i class="lg1"></i>Mediana</span>
+      <span><i class="lg2"></i>Peor 10%</span>
+      <span><i class="lg4"></i>CAGR fijo</span>
+    </div>
+    <p class="hint">Cada línea es el percentil de todas las ventanas en ese semestre, no el recorrido de una ventana en particular: ninguna ventana real siguió exactamente el trazo de la mediana. La línea del peor 10% cae a cero cuando ese porcentaje de las ventanas ya se quedó sin capital.</p>
+  </section>
+
+  <section class="card">
+    <h2>Capital final en las ventanas históricas</h2>
+    <p class="hint" style="margin:-6px 0 10px">Nominal arriba, poder de compra de hoy abajo.</p>
+    <dl class="datos" id="percentiles"></dl>
+  </section>
+
+  <details>
+    <summary>Las peores ventanas históricas</summary>
+    <div class="tablewrap">
+      <table><thead><tr><th>Arranca en</th><th>Capital final</th><th>Resultado</th></tr></thead>
+      <tbody id="tbPeores"></tbody></table>
+    </div>
+  </details>
+
+  <section class="card" style="margin-top:18px">
+    <h2>Supuestos y totales</h2>
+    <dl class="datos" id="datos"></dl>
+  </section>
+
+  <details id="detTabla">
+    <summary>Detalle semestre a semestre (CAGR fijo)</summary>
+    <div class="tablewrap">
+      <table><thead><tr><th>Año / Sem</th><th>Aporte</th><th>Retiro</th><th>Capital nominal</th><th>Capital real</th></tr></thead>
+      <tbody id="tbody"></tbody></table>
+    </div>
+  </details>
+
+  <section class="card hidden" id="cardComp">
+    <h2>Escenarios guardados</h2>
+    <div class="tablewrap" style="padding:0">
+      <table id="tablaComp"><thead></thead><tbody></tbody></table>
+    </div>
+    <button class="danger small borrarComp" type="button" style="margin-top:14px">Borrar todos los escenarios</button>
+  </section>
+
+  <button type="button" id="btnGuardar" class="noprint" style="margin-bottom:10px">Guardar este escenario para comparar</button>
+  <div class="rowbtns noprint">
+    <button class="ghost" type="button" id="btnShare">Compartir resumen</button>
+    <button class="ghost" type="button" id="btnPdf">Descargar PDF</button>
+  </div>
+  <p class="hint noprint" id="msg" style="margin-top:12px"></p>
+  <textarea id="fallback" class="hidden noprint" rows="14" readonly
+    style="width:100%;font-size:15px;font-family:ui-monospace,Menlo,monospace;padding:12px;border:2px solid var(--line);border-radius:8px;margin-top:10px"></textarea>
+  <div class="noprint" style="margin-top:10px">
+    <button type="button" id="btnVolver">Volver a editar</button>
+  </div>
+
+  <p class="nota">Serie del S&amp;P 500 1928–2024, retornos totales. La inflación se mantiene constante en todos los modelos: lo que varía es el orden de los retornos. No es asesoramiento financiero.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var orden = "A";
+var usarCPI = false;
+var ultimo = null;
+
+/* ===== Serie histórica: retornos totales anuales del S&P 500, % ===== */
+var ANIO0 = 1928;
+var SERIE = [
+ 43.81,-8.30,-25.12,-43.84,-8.64,49.98,-1.19,46.74,31.94,-35.34,
+ 29.28,-1.10,-10.67,-12.77,19.17,25.06,19.03,35.82,-8.43,5.20,
+ 5.70,18.30,30.81,23.68,18.15,-1.21,52.56,32.60,7.44,-10.46,
+ 43.72,12.06,0.34,26.64,-8.81,22.61,16.42,12.40,-9.97,23.80,
+ 10.81,-8.24,3.56,14.22,18.76,-14.31,-25.90,37.00,23.83,-6.98,
+ 6.51,18.52,31.74,-4.70,20.42,22.34,6.15,31.24,18.49,5.81,
+ 16.54,31.48,-3.06,30.23,7.49,9.97,1.33,37.20,22.68,33.10,
+ 28.34,20.89,-9.03,-11.85,-21.97,28.36,10.74,4.83,15.61,5.48,
+ -36.55,25.94,14.82,2.10,15.89,32.15,13.52,1.38,11.96,21.83,
+ -4.38,31.49,18.40,28.71,-18.11,26.29,25.02
+];
+
+/* ===== Inflación anual de EE.UU., % (IPC, variación diciembre a diciembre) =====
+   Mismos 97 años que SERIE, en el mismo orden: SERIE_CPI[k] es la inflación del
+   año en que el mercado rindió SERIE[k]. Calculada sobre la serie CPIAUCNS de
+   FRED (Reserva Federal de St. Louis). Acumula 18,2x en el período: 3,04% anual. */
+var SERIE_CPI = [
+ -1.16,0.58,-6.40,-9.32,-10.27,0.76,1.52,2.99,1.45,2.86,
+ -2.78,0.00,0.71,9.93,9.03,2.96,2.30,2.25,18.13,8.84,
+ 2.99,-2.07,5.93,6.00,0.75,0.75,-0.74,0.37,2.99,2.90,
+ 1.76,1.73,1.36,0.67,1.33,1.64,0.97,1.92,3.46,3.04,
+ 4.72,6.20,5.57,3.27,3.41,8.71,12.34,6.94,4.86,6.70,
+ 9.02,13.29,12.52,8.92,3.83,3.79,3.95,3.80,1.10,4.43,
+ 4.42,4.65,6.11,3.06,2.90,2.75,2.67,2.54,3.32,1.70,
+ 1.61,2.68,3.39,1.55,2.38,1.88,3.26,3.42,2.54,4.08,
+ 0.09,2.72,1.50,2.96,1.74,1.50,0.76,0.73,2.07,2.11,
+ 1.91,2.29,1.36,7.04,6.45,3.35,2.89
+];
+
+/* ---------- formato ---------- */
+function usd(n){ if(!isFinite(n)) n=0; return "$" + Math.round(n).toLocaleString("en-US"); }
+function usd2(n){ if(!isFinite(n)) n=0; return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function pc(n){ return (n*100).toFixed(2) + "%"; }
+function pc0(n){ return (n*100).toFixed(1) + "%"; }
+function num(el){ var v = parseFloat(String(el.value).replace(",",".")); return isFinite(v)?v:0; }
+function periodo(a,s){ return (a-1)*2 + s; }
+function etiquetaPeriodo(p){ return "Año " + Math.ceil(p/2) + " / S" + (p%2===1?1:2); }
+function percentil(arr, q){
+  if(!arr.length) return 0;
+  var a = arr.slice().sort(function(x,y){ return x-y; });
+  var i = (a.length-1) * q, lo = Math.floor(i), hi = Math.ceil(i);
+  return lo===hi ? a[lo] : a[lo] + (a[hi]-a[lo])*(i-lo);
+}
+
+/* ---------- filas dinámicas ---------- */
+function crearFila(cont, anio, sem, monto, textoMonto){
+  var d = document.createElement("div");
+  d.className = "fila";
+  d.innerHTML =
+    '<div class="grid3">' +
+      '<div><label>Año</label><input class="f-anio" type="number" inputmode="numeric" min="1" step="1"></div>' +
+      '<div><label>Sem</label><select class="f-sem"><option value="1">1</option><option value="2">2</option></select></div>' +
+      '<div><label>' + textoMonto + '</label><input class="f-monto" type="number" inputmode="decimal" min="0" step="500"></div>' +
+    '</div><button class="danger quitar" type="button">Quitar</button>';
+  d.querySelector(".f-anio").value = anio;
+  d.querySelector(".f-sem").value = String(sem);
+  d.querySelector(".f-monto").value = monto;
+  d.querySelector(".quitar").addEventListener("click", function(){ d.remove(); refrescarVacios(); validar(); });
+  d.addEventListener("input", validar);
+  cont.appendChild(d);
+}
+function leerFilas(cont){
+  var out = [], filas = cont.querySelectorAll(".fila");
+  for(var i=0;i<filas.length;i++){
+    var a = parseInt(filas[i].querySelector(".f-anio").value,10);
+    var s = parseInt(filas[i].querySelector(".f-sem").value,10);
+    var m = parseFloat(String(filas[i].querySelector(".f-monto").value).replace(",","."));
+    if(!isFinite(a)||a<1) continue;
+    if(!isFinite(m)) m = 0;
+    out.push({anio:a, sem:(s===2?2:1), monto:m, p:periodo(a,(s===2?2:1))});
+  }
+  out.sort(function(x,y){ return x.p-y.p; });
+  return out;
+}
+function refrescarVacios(){
+  [["filasAportes","Sin aportes cargados. Toque “Agregar aporte” si va a sumar capital nuevo."],
+   ["filasAjustes","Sin ajustes. El retiro sigue el monto inicial más inflación durante todo el período."]]
+  .forEach(function(par){
+    var cont = $(par[0]), prev = cont.parentNode.querySelector(".empty");
+    if(prev) prev.remove();
+    if(cont.querySelectorAll(".fila").length === 0){
+      var e = document.createElement("div");
+      e.className = "empty"; e.textContent = par[1];
+      cont.parentNode.insertBefore(e, cont.nextSibling);
+    }
+  });
+}
+
+/* ===================== MOTOR =====================
+   Agotarse no corta la simulación: si hay aportes posteriores, el capital se
+   recupera y los retiros se reanudan. Pero `agotado` queda marcado con el
+   período del PRIMER agotamiento y no se limpia nunca, así que el plan sigue
+   contando como fracaso en `exitoso()` aunque termine con capital.
+   Antes se cortaba con un break: los aportes posteriores se perdían, mientras
+   que el objetivo de capital final sí los contaba. */
+function simular(cfg, retornos, escala, acum){
+  var n = cfg.n, A = acum || cfg.acum;
+  var cap = cfg.capital, totalRet = 0, totalAp = 0;
+  var agotado = false, pAgot = null, serie = [];
+  var base = (cfg.retBase > 0 ? cfg.retBase : 1) * escala;
+  var baseP = cfg.startP;
+
+  for(var i=1;i<=n;i++){
+    var ap = 0, a;
+    for(a=0;a<cfg.aportes.length;a++) if(cfg.aportes[a].p === i) ap += cfg.aportes[a].monto;
+    cap += ap; totalAp += ap;
+
+    var ret = 0;
+    if(i >= cfg.startP){
+      for(var j=0;j<cfg.ajustes.length;j++)
+        if(cfg.ajustes[j].p === i){ base = cfg.ajustes[j].monto * escala; baseP = i; }
+      ret = base * (A[i] / A[baseP]);
+    }
+    var r = retornos[i-1];
+    if(orden === "A"){
+      cap *= (1 + r);
+      if(ret > 0){
+        if(cap >= ret){ cap -= ret; totalRet += ret; }
+        else { ret = cap; totalRet += cap; cap = 0; if(!agotado){ agotado = true; pAgot = i; } }
+      }
+    } else {
+      if(ret > 0){
+        if(cap >= ret){ cap -= ret; totalRet += ret; }
+        else { ret = cap; totalRet += cap; cap = 0; if(!agotado){ agotado = true; pAgot = i; } }
+      }
+      cap *= (1 + r);
+    }
+    serie.push({p:i, aporte:ap, retiro:ret, nominal:cap, real:cap/A[i]});
+  }
+  return {serie:serie, finalNominal:cap, finalReal:cap/A[n],
+    totalRetirado:totalRet, totalAportado:totalAp, agotado:agotado, pAgot:pAgot};
+}
+
+/* ===================== SECUENCIAS DE RETORNOS ===================== */
+/* Un retorno anual se parte en dos mitades geométricas iguales. */
+function aSemestral(anualesPct){
+  var out = [];
+  for(var i=0;i<anualesPct.length;i++){
+    var s = Math.pow(1 + anualesPct[i]/100, 0.5) - 1;
+    out.push(s, s);
+  }
+  return out;
+}
+function setConstante(cagr, anios){
+  var s = Math.pow(1+cagr, 0.5) - 1, out = [];
+  for(var i=0;i<anios*2;i++) out.push(s);
+  return out;
+}
+/* Nivel de precios semestre a semestre: acum[0]=1 y acum[i] = precios en el
+   semestre i. Reemplaza a Math.pow(1+is,i), que solo servía con inflación fija.
+   Con inflación constante da exactamente lo mismo. */
+function acumConstante(is, n){
+  var a = [1];
+  for(var i=1;i<=n;i++) a.push(a[i-1]*(1+is));
+  return a;
+}
+function acumDeAnuales(anualesPct, n){
+  var a = [1], i, s;
+  for(i=0;i<anualesPct.length;i++){
+    s = Math.pow(1 + anualesPct[i]/100, 0.5) - 1;
+    a.push(a[a.length-1]*(1+s));
+    a.push(a[a.length-1]*(1+s));
+  }
+  while(a.length <= n) a.push(a[a.length-1]);
+  return a;
+}
+function ventanasHistoricas(anios, cfg, cpi){
+  var A = Math.ceil(anios), sets = [];
+  for(var s=0; s+A <= SERIE.length; s++){
+    sets.push({inicio: ANIO0 + s, retornos: aSemestral(SERIE.slice(s, s+A)),
+      acum: cpi ? acumDeAnuales(SERIE_CPI.slice(s, s+A), cfg.n) : cfg.acum});
+  }
+  return sets;
+}
+function rng(seed){
+  var s = seed >>> 0;
+  return function(){ s = (s*1664525 + 1013904223) >>> 0; return s/4294967296; };
+}
+/* Sortea índices de año, no retornos sueltos: así el retorno y la inflación
+   que entran a una corrida son los del mismo año y no se rompe la correlación
+   entre ambos (los años de inflación alta suelen ser los de retorno malo). */
+function setsMonteCarlo(anios, corridas, bloque, seed, cfg, cpi){
+  var A = Math.ceil(anios), r = rng(seed), sets = [], L = Math.max(1, bloque);
+  for(var c=0;c<corridas;c++){
+    var idx = [];
+    while(idx.length < A){
+      var ini = Math.floor(r() * SERIE.length);
+      for(var b=0;b<L && idx.length<A;b++) idx.push((ini+b) % SERIE.length);
+    }
+    sets.push({inicio:null,
+      retornos: aSemestral(idx.map(function(k){ return SERIE[k]; })),
+      acum: cpi ? acumDeAnuales(idx.map(function(k){ return SERIE_CPI[k]; }), cfg.n) : cfg.acum});
+  }
+  return sets;
+}
+
+/* ===================== EVALUACIÓN ===================== */
+function exitoso(s, objetivo){ return !s.agotado && s.finalNominal >= objetivo; }
+
+function tasaExito(cfg, sets, escala, objetivo){
+  var ok = 0;
+  for(var i=0;i<sets.length;i++)
+    if(exitoso(simular(cfg, sets[i].retornos, escala, sets[i].acum), objetivo)) ok++;
+  return ok / sets.length;
+}
+/* 22 pasos de bisección dejan el resultado con un error menor a un centavo.
+   Más pasos solo gastan tiempo: la tasa de éxito es escalonada, el escalón más
+   chico con 1.000 corridas es de una décima de punto porcentual. */
+function sostenibleNivel(cfg, sets, objetivo, nivel){
+  if(tasaExito(cfg, sets, 0, objetivo) < nivel) return null;
+  var lo = 0, hi = 1, i;
+  for(i=0;i<50 && tasaExito(cfg, sets, hi, objetivo) >= nivel; i++) hi *= 2;
+  for(i=0;i<22;i++){
+    var mid = (lo+hi)/2;
+    if(tasaExito(cfg, sets, mid, objetivo) >= nivel) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+/* Mismo criterio que los otros dos modelos: no agotarse y llegar al objetivo.
+   Si solo se mirara finalNominal, con objetivo 0 un plan que funde el capital
+   contaría como sostenible. */
+function sostenibleDeterminista(cfg, retornos, objetivo){
+  if(!exitoso(simular(cfg, retornos, 0), objetivo)) return null;
+  var lo = 0, hi = 1, i;
+  for(i=0;i<60 && exitoso(simular(cfg, retornos, hi), objetivo); i++) hi *= 2;
+  for(i=0;i<34;i++){
+    var mid = (lo+hi)/2;
+    if(exitoso(simular(cfg, retornos, mid), objetivo)) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+
+/* ---------- lectura de la UI ---------- */
+function leerCfg(){
+  var anios = num($("anios")), n = Math.max(1, Math.round(anios*2));
+  var cagr = num($("cagr"))/100, infl = num($("infl"))/100;
+  var is = Math.pow(1+infl,0.5)-1;
+  return {
+    anios:anios, n:n, capital:num($("capital")), cagr:cagr, infl:infl,
+    ts: Math.pow(1+cagr,0.5)-1, is: is, acum: acumConstante(is, n),
+    aportes: leerFilas($("filasAportes")), ajustes: leerFilas($("filasAjustes")),
+    retBase: num($("retMonto")),
+    startP: periodo(Math.max(1,Math.round(num($("retAnio")))), parseInt($("retSem").value,10)),
+    targetPct: parseInt($("target").value,10),
+    nivel: Math.min(100,Math.max(50,num($("nivel"))))/100,
+    corridas: Math.min(5000,Math.max(200,Math.round(num($("corridas"))))),
+    bloque: Math.min(15,Math.max(1,Math.round(num($("bloque")))))
+  };
+}
+
+/* ---------- validación ---------- */
+function validar(){
+  var c = leerCfg(), errs = [];
+  if(c.capital <= 0) errs.push("El capital inicial tiene que ser mayor a cero.");
+  if(!(c.anios > 0)) errs.push("El horizonte tiene que ser mayor a cero años.");
+  if(c.infl < 0) errs.push("La inflación no puede ser negativa.");
+  if(Math.ceil(c.anios) > SERIE.length)
+    errs.push("El horizonte supera los " + SERIE.length + " años de historia disponible. No se puede hacer backtest.");
+  if(c.startP > c.n) errs.push("Los retiros arrancan después del final del horizonte (" + etiquetaPeriodo(c.startP) + ").");
+  var vNivel = num($("nivel")), vCorr = num($("corridas")), vBloq = num($("bloque"));
+  if(!(vNivel >= 50 && vNivel <= 100)) errs.push("El nivel de éxito exigido tiene que estar entre 50% y 100%.");
+  if(!(vCorr >= 200 && vCorr <= 5000)) errs.push("Las corridas de Monte Carlo tienen que estar entre 200 y 5.000.");
+  if(!(vBloq >= 1 && vBloq <= 15)) errs.push("El tamaño del bloque tiene que estar entre 1 y 15 años.");
+  c.aportes.forEach(function(a){
+    if(a.p > c.n) errs.push("El aporte de " + usd(a.monto) + " está en " + etiquetaPeriodo(a.p) + ", fuera del horizonte.");
+  });
+  c.ajustes.forEach(function(a){
+    if(a.p > c.n) errs.push("El ajuste de retiro de " + usd(a.monto) + " está en " + etiquetaPeriodo(a.p) + ", fuera del horizonte.");
+    else if(a.p < c.startP) errs.push("El ajuste en " + etiquetaPeriodo(a.p) + " es anterior al primer retiro. No se aplica.");
+  });
+
+  var box = $("avisos"); box.innerHTML = "";
+  if(errs.length){
+    var d = document.createElement("div"); d.className = "aviso";
+    var ul = "<ul>"; errs.forEach(function(e){ ul += "<li>"+e+"</li>"; });
+    d.innerHTML = "Revise lo siguiente antes de calcular:" + ul + "</ul>";
+    box.appendChild(d);
+  }
+  $("calcular").disabled = errs.length > 0;
+  $("calcular").style.opacity = errs.length ? .5 : 1;
+
+  var real = (1+c.cagr)/(1+c.infl) - 1;
+  $("hintReal").textContent = "Retorno real (Fisher): " + pc(real) + " anual.";
+  var nv = Math.max(0, SERIE.length - Math.ceil(c.anios) + 1);
+  $("hintAnios").textContent = c.n + " semestres · " + nv + " ventanas históricas disponibles." +
+    (c.anios > 30 ? " Más de 30 años: la regla del 4% se calibró justamente a 30." : "");
+  actualizarTarget(c);
+  return errs.length === 0;
+}
+function fijarTarget(v){
+  v = Math.round(Math.max(0,Math.min(100,isFinite(v)?v:0))/5)*5;
+  $("target").value = String(v); $("tNum").value = String(v);
+  actualizarTarget(leerCfg());
+}
+function actualizarTarget(c){
+  var pctT = parseInt($("target").value,10) || 0;
+  var invertido = c.capital + c.aportes.reduce(function(s,a){ return s + (a.p<=c.n?a.monto:0); },0);
+  var objNom = invertido * pctT/100;
+  var factor = Math.pow(1+c.is, c.n), objReal = objNom/factor;
+  var pctReal = invertido>0 ? (objReal/invertido*100) : 0;
+  $("tRead").innerHTML = "Objetivo: <b>"+usd(objNom)+"</b> nominales sobre "+usd(invertido)+" invertidos.<br>" +
+    "En poder de compra de hoy son <b>"+usd(objReal)+"</b>, o sea el <b>"+pctReal.toFixed(0)+"%</b> de lo invertido.";
+}
+
+/* ---------- gráfico ---------- */
+function prepararCanvas(cv, alto){
+  var dpr = window.devicePixelRatio || 1, ancho = cv.clientWidth || 320;
+  cv.width = Math.round(ancho*dpr); cv.height = Math.round(alto*dpr);
+  cv.style.height = alto + "px";
+  var g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,ancho,alto);
+  return {g:g, w:ancho, h:alto};
+}
+function ejes(g,w,h,m,minY,maxY,labelsX){
+  g.strokeStyle="#D4D4D8"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(m.l,m.t); g.lineTo(m.l,h-m.b); g.lineTo(w-m.r,h-m.b); g.stroke();
+  g.fillStyle="#3F3F46"; g.font="600 12px -apple-system,sans-serif";
+  for(var i=0;i<=4;i++){
+    var v = minY + (maxY-minY)*i/4, y = h-m.b - (h-m.b-m.t)*i/4;
+    g.strokeStyle="#E4E4E7"; g.lineWidth=1;
+    g.beginPath(); g.moveTo(m.l,y); g.lineTo(w-m.r,y); g.stroke();
+    g.textAlign="right"; g.textBaseline="middle";
+    var t = Math.abs(v)>=1000000 ? (v/1000000).toFixed(1)+"M" : Math.abs(v)>=1000 ? Math.round(v/1000)+"k" : Math.round(v);
+    g.fillText(t, m.l-6, y);
+  }
+  g.textAlign="center"; g.textBaseline="top";
+  labelsX.forEach(function(o){ g.fillText(o.t, o.x, h-m.b+8); });
+}
+function linea(g,pts,color,dash,ancho,m,w,h,minX,maxX,minY,maxY){
+  var px=function(x){ return m.l+(w-m.l-m.r)*(x-minX)/(maxX-minX||1); };
+  var py=function(y){ return h-m.b-(h-m.b-m.t)*(y-minY)/(maxY-minY||1); };
+  g.strokeStyle=color; g.lineWidth=ancho; g.lineJoin="round"; g.lineCap="round"; g.setLineDash(dash);
+  g.beginPath();
+  pts.forEach(function(p,i){ if(i===0) g.moveTo(px(p.x),py(p.y)); else g.lineTo(px(p.x),py(p.y)); });
+  g.stroke(); g.setLineDash([]);
+}
+function dibujarCapital(cfg, sim){
+  var c = prepararCanvas($("chartCap"), 300), m={l:52,r:14,t:14,b:32}, n=cfg.n;
+  var maxY = cfg.capital;
+  sim.serie.forEach(function(s){ maxY = Math.max(maxY, s.nominal, s.real); });
+  maxY = maxY*1.08 || 1;
+  var labels = [], paso = Math.max(1, Math.ceil(cfg.anios/6));
+  for(var a=0;a<=Math.floor(cfg.anios);a+=paso)
+    labels.push({t:String(a), x:m.l+(c.w-m.l-m.r)*(a*2)/(n||1)});
+  ejes(c.g,c.w,c.h,m,0,maxY,labels);
+  var pn=[{x:0,y:cfg.capital}], pr=[{x:0,y:cfg.capital}];
+  sim.serie.forEach(function(s){ pn.push({x:s.p,y:s.nominal}); pr.push({x:s.p,y:s.real}); });
+  linea(c.g, pr, "#C2410C", [8,6], 3, m,c.w,c.h,0,n,0,maxY);
+  linea(c.g, pn, "#1D4ED8", [],    4, m,c.w,c.h,0,n,0,maxY);
+  c.g.fillStyle="#3F3F46"; c.g.font="600 12px -apple-system,sans-serif"; c.g.textAlign="center";
+  c.g.fillText("Años", (c.w+m.l)/2, c.h-14);
+}
+function dibujarFan(cfg, bandas, detSerie){
+  var c = prepararCanvas($("chartFan"), 300), m={l:52,r:14,t:14,b:32}, n=cfg.n;
+  var maxY = 0;
+  bandas.p90.concat(bandas.p50, bandas.p10).forEach(function(v){ maxY=Math.max(maxY,v); });
+  detSerie.forEach(function(s){ maxY=Math.max(maxY,s.nominal); });
+  maxY = maxY*1.08 || 1;
+  var labels = [], paso = Math.max(1, Math.ceil(cfg.anios/6));
+  for(var a=0;a<=Math.floor(cfg.anios);a+=paso)
+    labels.push({t:String(a), x:m.l+(c.w-m.l-m.r)*(a*2)/(n||1)});
+  ejes(c.g,c.w,c.h,m,0,maxY,labels);
+  function pts(arr){ var o=[{x:0,y:cfg.capital}]; arr.forEach(function(v,i){ o.push({x:i+1,y:v}); }); return o; }
+  linea(c.g, pts(bandas.p90), "#15803D", [2,4], 3, m,c.w,c.h,0,n,0,maxY);
+  linea(c.g, pts(bandas.p10), "#B91C1C", [9,6], 3, m,c.w,c.h,0,n,0,maxY);
+  var det=[{x:0,y:cfg.capital}]; detSerie.forEach(function(s){ det.push({x:s.p,y:s.nominal}); });
+  linea(c.g, det, "#71717A", [], 2, m,c.w,c.h,0,n,0,maxY);
+  linea(c.g, pts(bandas.p50), "#1D4ED8", [], 4, m,c.w,c.h,0,n,0,maxY);
+  c.g.fillStyle="#3F3F46"; c.g.font="600 12px -apple-system,sans-serif"; c.g.textAlign="center";
+  c.g.fillText("Años", (c.w+m.l)/2, c.h-14);
+}
+
+/* ---------- calcular ---------- */
+function calcular(){
+  if(!validar()) return;
+  $("calcular").textContent = "Calculando…";
+  setTimeout(correr, 30);
+}
+
+function correr(){
+  var cfg = leerCfg();
+  var invertido = cfg.capital + cfg.aportes.reduce(function(s,a){ return s + (a.p<=cfg.n?a.monto:0); },0);
+  var objetivo = invertido * cfg.targetPct/100;
+
+  var baseRef = (cfg.retBase > 0 ? cfg.retBase : 1);
+  function aMonto(k){ return k === null ? null : baseRef * k; }
+
+  /* 1. determinístico: siempre con la inflación constante que cargó el usuario */
+  var setDet = setConstante(cfg.cagr, cfg.anios);
+  var simDet = simular(cfg, setDet, 1, cfg.acum);
+  var sostDet = aMonto(sostenibleDeterminista(cfg, setDet, objetivo));
+
+  /* 2. histórico */
+  var setsH = ventanasHistoricas(cfg.anios, cfg, usarCPI);
+  var corridasH = setsH.map(function(w){
+    var s = simular(cfg, w.retornos, 1, w.acum);
+    return {inicio:w.inicio, sim:s, ok:exitoso(s, objetivo)};
+  });
+  var okH = corridasH.filter(function(x){ return x.ok; }).length;
+  var tasaH = setsH.length ? okH/setsH.length : 0;
+  var sostH = setsH.length ? aMonto(sostenibleNivel(cfg, setsH, objetivo, cfg.nivel)) : null;
+
+  /* 3. Monte Carlo. Se cuentan los éxitos sobre la marcha: guardar las mil
+     simulaciones completas era medio millón de objetos que no se usaban. */
+  var setsM = setsMonteCarlo(cfg.anios, cfg.corridas, cfg.bloque, 20260801, cfg, usarCPI);
+  var okM = 0;
+  for(var im=0; im<setsM.length; im++)
+    if(exitoso(simular(cfg, setsM[im].retornos, 1, setsM[im].acum), objetivo)) okM++;
+  var tasaM = okM/setsM.length;
+  var sostM = aMonto(sostenibleNivel(cfg, setsM, objetivo, cfg.nivel));
+
+  /* bandas del abanico (histórico) */
+  var bandas = {p10:[], p50:[], p90:[]};
+  for(var p=0;p<cfg.n;p++){
+    var col = corridasH.map(function(x){ return x.sim.serie[p] ? x.sim.serie[p].nominal : 0; });
+    bandas.p10.push(percentil(col,0.10));
+    bandas.p50.push(percentil(col,0.50));
+    bandas.p90.push(percentil(col,0.90));
+  }
+
+  var finalesH = corridasH.map(function(x){ return x.sim.finalNominal; });
+  var factorFinal = Math.pow(1+cfg.is, cfg.n);
+  var real = (1+cfg.cagr)/(1+cfg.infl) - 1;
+  var nRet = Math.max(0, cfg.n - cfg.startP + 1);
+
+  /* estado */
+  var est = $("estado"), cls, txt;
+  if(tasaH >= cfg.nivel && tasaM >= cfg.nivel){
+    cls = "ok";
+    txt = "Su plan aguanta: sobrevivió en " + okH + " de " + setsH.length + " ventanas históricas.";
+  } else if(tasaH >= 0.75 || tasaM >= 0.75){
+    cls = "warn";
+    txt = "Al límite: sobrevivió en " + okH + " de " + setsH.length + " ventanas (" + pc0(tasaH) +
+      "), por debajo del " + Math.round(cfg.nivel*100) + "% exigido.";
+  } else {
+    cls = "bad";
+    txt = "Su plan falla en la historia: solo " + okH + " de " + setsH.length + " ventanas (" + pc0(tasaH) + ") llegaron al objetivo.";
+  }
+  var detTxt;
+  if(simDet.agotado)
+    detTxt = "CAGR fijo: capital agotado en " + etiquetaPeriodo(simDet.pAgot) + "." +
+      (simDet.finalNominal > 0 ? " Los aportes posteriores lo recuperan hasta " +
+        usd(simDet.finalNominal) + ", pero el plan ya se quedó sin fondos una vez." : "");
+  else if(simDet.finalNominal >= objetivo)
+    detTxt = "CAGR fijo: objetivo cumplido, sobran " + usd(simDet.finalNominal - objetivo) + ".";
+  else if(simDet.finalNominal >= objetivo*0.85)
+    detTxt = "CAGR fijo: cerca del objetivo, faltan " + usd(objetivo - simDet.finalNominal) + ".";
+  else
+    detTxt = "CAGR fijo: objetivo no alcanzado, faltan " + usd(objetivo - simDet.finalNominal) + ".";
+
+  est.className = "estado " + cls;
+  est.innerHTML = '<div class="tag">Resultado</div><div class="txt">'+txt+'</div>' +
+    '<div class="det2">'+detTxt+'</div>';
+
+  /* tres modelos */
+  function bloqueModo(clase, nombre, detalle, sost, tasa, extra){
+    return '<div class="modo '+clase+'"><div class="nom">'+nombre+'</div>' +
+      '<div class="det">'+detalle+'</div><div class="cifras">' +
+      '<div><div class="et">Retiro sostenible</div><div class="nu">'+(sost===null?"—":usd(sost))+'</div></div>' +
+      '<div><div class="et">'+(extra||"Éxito de su plan")+'</div><div class="nu">'+tasa+'</div></div>' +
+      '</div></div>';
+  }
+  $("modos").innerHTML =
+    bloqueModo("d","CAGR fijo", pc(cfg.cagr)+" todos los años, sin variación",
+      sostDet, simDet.agotado ? "Agotado" : (simDet.finalNominal>=objetivo?"Cumple":"No cumple"), "Su plan") +
+    bloqueModo("h","Backtest histórico", setsH.length+" ventanas reales de "+Math.ceil(cfg.anios)+" años (1928–2024)",
+      sostH, okH+" de "+setsH.length+" ("+pc0(tasaH)+")") +
+    bloqueModo("m","Monte Carlo", cfg.corridas+" corridas, bloques de "+cfg.bloque+" años",
+      sostM, pc0(tasaM));
+  $("modosNota").textContent = "Los retiros sostenibles de las dos últimas filas son los que sobreviven en al menos el " +
+    Math.round(cfg.nivel*100) + "% de los casos. El de la primera fila supone que el mercado rinde exactamente " +
+    pc(cfg.cagr) + " todos los años.";
+
+  if(sostDet === null){
+    $("kSost").textContent = "No alcanzable";
+    $("kSostN").textContent = "Ni siquiera sin retirar nada se llega a " + usd(objetivo) +
+      " nominales sin agotar el capital. Baje el objetivo o suba el capital inicial.";
+  } else {
+    $("kSost").textContent = usd(sostDet);
+    $("kSostN").textContent = "Es el primer retiro. El último llega a " +
+      usd(sostDet * Math.pow(1+cfg.is, Math.max(0, nRet-1))) +
+      " nominales por la indexación. Usted planteó " + usd(cfg.retBase) + ".";
+  }
+
+  var brecha = (sostDet!==null && sostH!==null && sostDet>0) ? (1 - sostH/sostDet) : null;
+  $("kExito").textContent = pc0(tasaH);
+  $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " por semestre desde " + etiquetaPeriodo(cfg.startP) + ". " +
+    (brecha===null ? "" : "El CAGR fijo permitiría retirar un " + (brecha*100).toFixed(0) +
+     "% más que el histórico al " + Math.round(cfg.nivel*100) + "% de éxito: esa diferencia es el precio del seguro.");
+
+  $("resSub").textContent = usd(cfg.capital) + " iniciales · " + cfg.anios + " años · objetivo " +
+    cfg.targetPct + "% (" + usd(objetivo) + ") · inflación " + pc(cfg.infl);
+
+  var realesH = corridasH.map(function(x){ return x.sim.finalReal; });
+  var medNom = percentil(finalesH, 0.50), medReal = percentil(realesH, 0.50);
+
+  $("kNom").textContent = usd(simDet.finalNominal);
+  $("kNomN").textContent = "Con CAGR fijo. La mediana de las " + setsH.length + " ventanas históricas es " +
+    usd(medNom) + ". Objetivo: " + usd(objetivo) + " (" + cfg.targetPct + "% de lo invertido).";
+
+  $("kReal").textContent = usd(simDet.finalReal);
+  $("kRealN").textContent = "Con CAGR fijo, equivale al " +
+    (invertido>0 ? (simDet.finalReal/invertido*100).toFixed(0) : 0) + "% de lo invertido. " +
+    "Mediana histórica: " + usd(medReal) + ". La inflación multiplica los precios por " +
+    factorFinal.toFixed(2) + " en " + cfg.anios + " años.";
+
+  /* percentiles */
+  var pctl = [
+    ["Peor ventana", usd(Math.min.apply(null, finalesH)), usd(Math.min.apply(null, realesH))],
+    ["Percentil 10", usd(percentil(finalesH,0.10)), usd(percentil(realesH,0.10))],
+    ["Mediana", usd(medNom), usd(medReal)],
+    ["Percentil 90", usd(percentil(finalesH,0.90)), usd(percentil(realesH,0.90))],
+    ["Mejor ventana", usd(Math.max.apply(null, finalesH)), usd(Math.max.apply(null, realesH))],
+    ["CAGR fijo, para comparar", usd(simDet.finalNominal), usd(simDet.finalReal)]
+  ];
+  var dp = $("percentiles"); dp.innerHTML = "";
+  pctl.forEach(function(f){ var d=document.createElement("div");
+    d.innerHTML = "<dt>"+f[0]+"</dt><dd>"+f[1]+
+      "<br><span style='font-weight:600;color:#C2410C'>"+f[2]+" real</span></dd>";
+    dp.appendChild(d); });
+
+  /* peores ventanas */
+  var peores = corridasH.slice().sort(function(a,b){ return a.sim.finalNominal - b.sim.finalNominal; }).slice(0,10);
+  var tp = $("tbPeores"); tp.innerHTML = "";
+  peores.forEach(function(x){
+    var tr = document.createElement("tr");
+    if(!x.ok) tr.className = "malo";
+    tr.innerHTML = "<td>"+x.inicio+"</td><td>"+usd(x.sim.finalNominal)+"</td><td>" +
+      (x.sim.agotado ? "Agotado en "+etiquetaPeriodo(x.sim.pAgot) : (x.ok?"Cumple":"No llega al objetivo")) + "</td>";
+    tp.appendChild(tr);
+  });
+
+  /* supuestos */
+  var filas = [
+    ["Retorno nominal anual (modelo fijo)", pc(cfg.cagr)],
+    ["Inflación anual", pc(cfg.infl)],
+    ["Inflación en el backtest y el Monte Carlo",
+      usarCPI ? "IPC real de cada año (1928–2024)" : "Constante, " + pc(cfg.infl)],
+    ["Retorno real anual (Fisher)", pc(real)],
+    ["Retorno nominal semestral", pc(cfg.ts)],
+    ["Inflación semestral", pc(cfg.is)],
+    ["Capital inicial", usd(cfg.capital)],
+    ["Aportes posteriores", usd(simDet.totalAportado)],
+    ["Capital total invertido", usd(invertido)],
+    ["Primer retiro", etiquetaPeriodo(cfg.startP)],
+    ["Cantidad de retiros", String(nRet)],
+    ["Total retirado nominal (CAGR fijo)", usd(simDet.totalRetirado)],
+    ["Multiplicador nominal (CAGR fijo)", (invertido>0?simDet.finalNominal/invertido:0).toFixed(2)+"x"],
+    ["Multiplicador real (CAGR fijo)", (invertido>0?simDet.finalReal/invertido:0).toFixed(2)+"x"],
+    ["Ventanas históricas", String(setsH.length)],
+    ["Corridas Monte Carlo", String(cfg.corridas) + " · bloques de " + cfg.bloque + " años"],
+    ["Nivel de éxito exigido", Math.round(cfg.nivel*100) + "%"],
+    ["Orden en el semestre", orden==="A" ? "Aporte, crecimiento, retiro" : "Aporte, retiro, crecimiento"]
+  ];
+  var dl = $("datos"); dl.innerHTML = "";
+  filas.forEach(function(f){ var d=document.createElement("div");
+    d.innerHTML="<dt>"+f[0]+"</dt><dd>"+f[1]+"</dd>"; dl.appendChild(d); });
+
+  /* tabla determinística */
+  var tb = $("tbody"); tb.innerHTML = "";
+  simDet.serie.forEach(function(s){
+    var tr = document.createElement("tr");
+    if(simDet.agotado && (s.p === simDet.pAgot || s.nominal <= 0)) tr.className = "agot";
+    tr.innerHTML = "<td>"+etiquetaPeriodo(s.p)+"</td><td>"+(s.aporte?usd(s.aporte):"—")+
+      "</td><td>"+(s.retiro?usd(s.retiro):"—")+"</td><td>"+usd(s.nominal)+"</td><td>"+usd(s.real)+"</td>";
+    tb.appendChild(tr);
+  });
+
+  $("calcular").textContent = "Calcular los tres modelos";
+  $("vistaCarga").classList.add("hidden");
+  $("vistaRes").classList.remove("hidden");
+  window.scrollTo(0,0);
+  dibujarCapital(cfg, simDet);
+  dibujarFan(cfg, bandas, simDet.serie);
+
+  ultimo = {cfg:cfg, simDet:simDet, sostDet:sostDet, sostH:sostH, sostM:sostM,
+    tasaH:tasaH, tasaM:tasaM, okH:okH, nH:setsH.length, finalesH:finalesH, realesH:realesH,
+    peores:peores, objetivo:objetivo, invertido:invertido, real:real, bandas:bandas, factorFinal:factorFinal};
+}
+
+/* ---------- resumen de texto ---------- */
+function textoResumen(){
+  if(!ultimo) return "";
+  var c = ultimo.cfg, s = ultimo.simDet;
+  return "SIMULACIÓN DE CAPITAL Y RETIROS\n\n" +
+    "Capital inicial: " + usd2(c.capital) + "\n" +
+    "Horizonte: " + c.anios + " años · Inflación: " + pc(c.infl) + "\n" +
+    "Capital total invertido: " + usd2(ultimo.invertido) + "\n" +
+    "Objetivo de capital final: " + usd2(ultimo.objetivo) + " (" + c.targetPct + "%)\n" +
+    "Retiro planteado: " + usd2(c.retBase) + " desde " + etiquetaPeriodo(c.startP) + "\n\n" +
+    "RETIRO SOSTENIBLE\n" +
+    "  CAGR fijo " + pc(c.cagr) + ": " + (ultimo.sostDet===null?"no alcanzable":usd2(ultimo.sostDet)) + "\n" +
+    "  Histórico al " + Math.round(c.nivel*100) + "%: " + (ultimo.sostH===null?"no alcanzable":usd2(ultimo.sostH)) + "\n" +
+    "  Monte Carlo al " + Math.round(c.nivel*100) + "%: " + (ultimo.sostM===null?"no alcanzable":usd2(ultimo.sostM)) + "\n\n" +
+    "ÉXITO DE SU PLAN\n" +
+    "  Histórico: " + ultimo.okH + " de " + ultimo.nH + " ventanas (" + pc0(ultimo.tasaH) + ")\n" +
+    "  Monte Carlo: " + pc0(ultimo.tasaM) + "\n\n" +
+    "CAPITAL FINAL (ventanas históricas)\n" +
+    "  Peor: " + usd2(Math.min.apply(null, ultimo.finalesH)) + "\n" +
+    "  Mediana: " + usd2(percentil(ultimo.finalesH,0.5)) + "\n" +
+    "  Mejor: " + usd2(Math.max.apply(null, ultimo.finalesH)) + "\n" +
+    "  CAGR fijo: " + usd2(s.finalNominal) + "\n\n" +
+    "CAPITAL FINAL REAL (poder de compra de hoy)\n" +
+    "  Mediana histórica: " + usd2(percentil(ultimo.realesH,0.5)) + "\n" +
+    "  CAGR fijo: " + usd2(s.finalReal) + "\n";
+}
+
+/* ---------- PDF ---------- */
+function latin1(s){
+  return String(s).replace(/[—–−]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'")
+    .replace(/→/g,">").replace(/…/g,"...").replace(/\u00A0/g," ").replace(/[^\x00-\xFF]/g,"?");
+}
+function escPdf(s){ return latin1(s).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)"); }
+function anchoTexto(s,size,bold){ return latin1(s).length*size*(bold?0.56:0.52); }
+function construirPDF(items){
+  var W=595.28,H=841.89,M=48,RIGHT=W-M, paginas=[], partes=[], y=H-M;
+  function nuevaPagina(){ if(partes.length) paginas.push(partes.join("\n")); partes=[]; y=H-M; }
+  function espacio(n){ if(y-n < M+24) nuevaPagina(); y-=n; }
+  function texto(x,size,bold,s){
+    partes.push("BT /"+(bold?"F2":"F1")+" "+size+" Tf "+x.toFixed(2)+" "+y.toFixed(2)+" Td ("+escPdf(s)+") Tj ET");
+  }
+  function derecha(xr,size,bold,s){ texto(xr-anchoTexto(s,size,bold),size,bold,s); }
+  function regla(g){ partes.push("0.72 0.72 0.75 rg "+M+" "+y.toFixed(2)+" "+(RIGHT-M).toFixed(2)+" "+g+" re f 0 0 0 rg"); }
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    if(it.tipo==="titulo"){ espacio(26); texto(M,20,true,it.texto); espacio(6); }
+    else if(it.tipo==="sub"){ espacio(15); texto(M,10.5,false,it.texto); espacio(10); }
+    else if(it.tipo==="seccion"){ espacio(22); texto(M,11,true,it.texto.toUpperCase()); espacio(5); regla(1.2); espacio(9); }
+    else if(it.tipo==="destacado"){ espacio(13); texto(M,9.5,false,it.k); espacio(19); texto(M,17,true,it.v);
+      if(it.n){ espacio(13); texto(M,9,false,it.n); } espacio(9); }
+    else if(it.tipo==="kv"){ espacio(15); texto(M,10.5,false,it.k); derecha(RIGHT,10.5,true,it.v); espacio(4); }
+    else if(it.tipo==="fila"||it.tipo==="filaHead"){
+      var head=it.tipo==="filaHead"; espacio(head?15:13.5);
+      for(var c=0;c<it.cols.length;c++){
+        if(c===0) texto(it.xs[c],head?8.5:9,head,it.cols[c]);
+        else derecha(it.xs[c],head?8.5:9,head,it.cols[c]);
+      }
+      if(head){ espacio(4); regla(1); } espacio(2);
+    }
+    else if(it.tipo==="texto"){ espacio(13); texto(M,9.5,false,it.texto); espacio(2); }
+    else if(it.tipo==="espacio"){ espacio(it.n||10); }
+  }
+  if(partes.length) paginas.push(partes.join("\n"));
+  if(!paginas.length) paginas.push("");
+
+  var P=paginas.length, idPage=5, idCont=5+P, objs=[], p, k;
+  objs[1]="<< /Type /Catalog /Pages 2 0 R >>";
+  var kids=[]; for(p=0;p<P;p++) kids.push((idPage+p)+" 0 R");
+  objs[2]="<< /Type /Pages /Kids ["+kids.join(" ")+"] /Count "+P+" >>";
+  objs[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+  objs[4]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+  for(p=0;p<P;p++){
+    objs[idPage+p]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+W.toFixed(2)+" "+H.toFixed(2)+
+      "] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents "+(idCont+p)+" 0 R >>";
+    objs[idCont+p]="<< /Length "+latin1(paginas[p]).length+" >>\nstream\n"+paginas[p]+"\nendstream";
+  }
+  var out="%PDF-1.4\n", offsets=[], total=4+2*P;
+  for(k=1;k<=total;k++){ offsets[k]=latin1(out).length; out += k+" 0 obj\n"+objs[k]+"\nendobj\n"; }
+  var xref=latin1(out).length;
+  out += "xref\n0 "+(total+1)+"\n0000000000 65535 f \n";
+  for(k=1;k<=total;k++) out += ("0000000000"+offsets[k]).slice(-10)+" 00000 n \n";
+  out += "trailer\n<< /Size "+(total+1)+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF";
+  var s=latin1(out), bytes=new Uint8Array(s.length);
+  for(var b=0;b<s.length;b++) bytes[b]=s.charCodeAt(b)&0xFF;
+  return bytes;
+}
+function itemsInforme(){
+  var c=ultimo.cfg, s=ultimo.simDet, it=[];
+  it.push({tipo:"titulo", texto:"Simulación de capital y retiros"});
+  it.push({tipo:"sub", texto: usd(c.capital)+" iniciales · "+c.anios+" años · objetivo "+c.targetPct+"% ("+usd(ultimo.objetivo)+")"});
+  it.push({tipo:"sub", texto:"Generado el "+new Date().toLocaleDateString("es-AR")+
+    " · serie S&P 500 1928-2024, retornos totales"});
+
+  it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo"});
+  it.push({tipo:"kv", k:"CAGR fijo "+pc(c.cagr), v: ultimo.sostDet===null?"No alcanzable":usd(ultimo.sostDet)});
+  it.push({tipo:"kv", k:"Histórico, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostH===null?"No alcanzable":usd(ultimo.sostH)});
+  it.push({tipo:"kv", k:"Monte Carlo, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostM===null?"No alcanzable":usd(ultimo.sostM)});
+
+  it.push({tipo:"seccion", texto:"Su plan"});
+  it.push({tipo:"destacado", k:"PROBABILIDAD DE ÉXITO (HISTÓRICO)", v: pc0(ultimo.tasaH),
+    n: ultimo.okH+" de "+ultimo.nH+" ventanas llegaron al objetivo retirando "+usd(c.retBase)+" por semestre."});
+  it.push({tipo:"kv", k:"Éxito Monte Carlo", v: pc0(ultimo.tasaM)});
+
+  it.push({tipo:"seccion", texto:"Capital final nominal en las ventanas históricas"});
+  [["Peor ventana", usd(Math.min.apply(null,ultimo.finalesH))],
+   ["Percentil 10", usd(percentil(ultimo.finalesH,0.10))],
+   ["Mediana", usd(percentil(ultimo.finalesH,0.50))],
+   ["Percentil 90", usd(percentil(ultimo.finalesH,0.90))],
+   ["Mejor ventana", usd(Math.max.apply(null,ultimo.finalesH))],
+   ["CAGR fijo, para comparar", usd(s.finalNominal)]
+  ].forEach(function(f){ it.push({tipo:"kv", k:f[0], v:f[1]}); });
+
+  it.push({tipo:"seccion", texto:"Capital final real (poder de compra de hoy)"});
+  [["Peor ventana", usd(Math.min.apply(null,ultimo.realesH))],
+   ["Percentil 10", usd(percentil(ultimo.realesH,0.10))],
+   ["Mediana", usd(percentil(ultimo.realesH,0.50))],
+   ["Percentil 90", usd(percentil(ultimo.realesH,0.90))],
+   ["Mejor ventana", usd(Math.max.apply(null,ultimo.realesH))],
+   ["CAGR fijo, para comparar", usd(s.finalReal)]
+  ].forEach(function(f){ it.push({tipo:"kv", k:f[0], v:f[1]}); });
+
+  var xs1=[48,300,547];
+  it.push({tipo:"seccion", texto:"Las peores ventanas históricas"});
+  it.push({tipo:"filaHead", xs:xs1, cols:["ARRANCA EN","CAPITAL FINAL","RESULTADO"]});
+  ultimo.peores.forEach(function(x){
+    it.push({tipo:"fila", xs:xs1, cols:[String(x.inicio), usd(x.sim.finalNominal),
+      x.sim.agotado ? "Agotado en "+etiquetaPeriodo(x.sim.pAgot) : (x.ok?"Cumple":"No llega")]});
+  });
+
+  it.push({tipo:"seccion", texto:"Supuestos"});
+  [["Retorno nominal anual (modelo fijo)", pc(c.cagr)],
+   ["Inflación anual", pc(c.infl)],
+   ["Retorno real anual (Fisher)", pc(ultimo.real)],
+   ["Retorno nominal semestral", pc(c.ts)],
+   ["Inflación semestral", pc(c.is)],
+   ["Capital total invertido", usd(ultimo.invertido)],
+   ["Primer retiro", etiquetaPeriodo(c.startP)],
+   ["Total retirado nominal (CAGR fijo)", usd(s.totalRetirado)],
+   ["Multiplicador nominal (CAGR fijo)", (ultimo.invertido>0?s.finalNominal/ultimo.invertido:0).toFixed(2)+"x"],
+   ["Multiplicador real (CAGR fijo)", (ultimo.invertido>0?s.finalReal/ultimo.invertido:0).toFixed(2)+"x"],
+   ["Ventanas históricas", String(ultimo.nH)],
+   ["Corridas Monte Carlo", String(c.corridas)+" · bloques de "+c.bloque+" años"],
+   ["Nivel de éxito exigido", Math.round(c.nivel*100)+"%"],
+   ["Orden en el semestre", orden==="A"?"Aporte, crecimiento, retiro":"Aporte, retiro, crecimiento"]
+  ].forEach(function(f){ it.push({tipo:"kv", k:f[0], v:f[1]}); });
+
+  var xs2=[48,250,350,455,547];
+  it.push({tipo:"seccion", texto:"Detalle semestre a semestre (CAGR fijo)"});
+  it.push({tipo:"filaHead", xs:xs2, cols:["AÑO / SEM","APORTE","RETIRO","CAPITAL NOM.","CAPITAL REAL"]});
+  s.serie.forEach(function(r){
+    it.push({tipo:"fila", xs:xs2, cols:[etiquetaPeriodo(r.p), r.aporte?usd(r.aporte):"-",
+      r.retiro?usd(r.retiro):"-", usd(r.nominal), usd(r.real)]});
+  });
+
+  it.push({tipo:"espacio", n:16});
+  it.push({tipo:"texto", texto:"La inflación se mantiene constante en los tres modelos: lo que varía es el orden de los retornos."});
+  it.push({tipo:"texto", texto:"Las ventanas históricas se solapan, así que el porcentaje describe la historia disponible, no una probabilidad."});
+  it.push({tipo:"texto", texto:"No es asesoramiento financiero. El rendimiento pasado no predice el futuro."});
+  return it;
+}
+
+/* ---------- escenarios guardados ----------
+   Se guarda solo el resumen, no la simulación entera: alcanza para comparar y
+   entra de sobra en localStorage. Si el navegador lo tiene bloqueado (Safari en
+   navegación privada), la comparación sigue funcionando dentro de la sesión. */
+var CLAVE = "carg_escenarios_v1";
+var enMemoria = [];
+function leerGuardados(){
+  try{ var s = localStorage.getItem(CLAVE); return s ? JSON.parse(s) : enMemoria; }
+  catch(e){ return enMemoria; }
+}
+function escribirGuardados(a){
+  enMemoria = a;
+  try{ localStorage.setItem(CLAVE, JSON.stringify(a)); }catch(e){}
+}
+function resumenEscenario(){
+  var c = ultimo.cfg;
+  return {
+    capital:c.capital, anios:c.anios, retBase:c.retBase, startP:c.startP,
+    cagr:c.cagr, infl:c.infl, targetPct:c.targetPct, nivel:c.nivel,
+    cpi:usarCPI, orden:orden, objetivo:ultimo.objetivo,
+    sostDet:ultimo.sostDet, sostH:ultimo.sostH, sostM:ultimo.sostM,
+    tasaH:ultimo.tasaH, tasaM:ultimo.tasaM, okH:ultimo.okH, nH:ultimo.nH,
+    finNom:ultimo.simDet.finalNominal, finReal:ultimo.simDet.finalReal
+  };
+}
+var FILAS_COMP = [
+  ["Capital inicial",            function(e){ return usd(e.capital); }],
+  ["Horizonte",                  function(e){ return e.anios + " años"; }],
+  ["Retiro planteado",           function(e){ return usd(e.retBase) + " desde " + etiquetaPeriodo(e.startP); }],
+  ["Objetivo de capital final",  function(e){ return usd(e.objetivo) + " (" + e.targetPct + "%)"; }],
+  ["CAGR e inflación",           function(e){ return pc(e.cagr) + " / " + pc(e.infl); }],
+  ["Inflación histórica",        function(e){ return e.cpi ? "IPC real" : "constante"; }],
+  ["Sostenible · CAGR fijo",     function(e){ return e.sostDet===null ? "—" : usd(e.sostDet); }],
+  ["Sostenible · histórico",     function(e){ return e.sostH===null ? "—" : usd(e.sostH); }],
+  ["Sostenible · Monte Carlo",   function(e){ return e.sostM===null ? "—" : usd(e.sostM); }],
+  ["Éxito histórico",            function(e){ return e.okH + " de " + e.nH + " (" + pc0(e.tasaH) + ")"; }],
+  ["Éxito Monte Carlo",          function(e){ return pc0(e.tasaM); }],
+  ["Capital final · CAGR fijo",  function(e){ return usd(e.finNom); }],
+  ["Capital final real",         function(e){ return usd(e.finReal); }]
+];
+function pintarComparacion(){
+  var g = leerGuardados();
+  [["cardComp","tablaComp"], ["cardComp2","tablaComp2"]].forEach(function(par){
+    var card = $(par[0]), tabla = $(par[1]);
+    if(!g.length){ card.classList.add("hidden"); return; }
+    card.classList.remove("hidden");
+    var th = "<tr><th></th>";
+    g.forEach(function(e,i){ th += "<th>Esc. " + (i+1) + "</th>"; });
+    var tb = "";
+    FILAS_COMP.forEach(function(f){
+      tb += "<tr><td>" + f[0] + "</td>";
+      g.forEach(function(e){ tb += "<td>" + f[1](e) + "</td>"; });
+      tb += "</tr>";
+    });
+    tabla.querySelector("thead").innerHTML = th + "</tr>";
+    tabla.querySelector("tbody").innerHTML = tb;
+  });
+}
+
+/* ---------- acciones ---------- */
+function aviso(t){ $("msg").textContent = t; }
+function mostrarFallback(t){
+  var f=$("fallback"); f.value=t; f.classList.remove("hidden"); f.focus();
+  f.setSelectionRange(0,t.length); aviso("Seleccione el texto de abajo y cópielo a mano.");
+}
+function copiarViejo(t){
+  try{
+    var ta=document.createElement("textarea"); ta.value=t;
+    ta.style.position="fixed"; ta.style.top="0"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,t.length);
+    var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok;
+  }catch(e){ return false; }
+}
+
+$("addAporte").addEventListener("click", function(){ crearFila($("filasAportes"),2,1,0,"Monto USD"); refrescarVacios(); validar(); });
+$("addAjuste").addEventListener("click", function(){ crearFila($("filasAjustes"),2,1,0,"Nuevo retiro USD"); refrescarVacios(); validar(); });
+$("target").addEventListener("input", function(){ $("tNum").value=$("target").value; actualizarTarget(leerCfg()); });
+$("target").addEventListener("change", function(){ fijarTarget(parseInt($("target").value,10)); });
+$("tNum").addEventListener("input", function(){
+  var v=parseInt($("tNum").value,10);
+  if(isFinite(v)){ $("target").value=String(Math.max(0,Math.min(100,v))); actualizarTarget(leerCfg()); }
+});
+$("tNum").addEventListener("blur", function(){ fijarTarget(parseInt($("tNum").value,10)); });
+$("tMenos").addEventListener("click", function(){ fijarTarget(parseInt($("target").value,10)-5); });
+$("tMas").addEventListener("click", function(){ fijarTarget(parseInt($("target").value,10)+5); });
+$("inflFija").addEventListener("click", function(){ usarCPI=false; $("inflFija").setAttribute("aria-pressed","true"); $("inflReal").setAttribute("aria-pressed","false"); });
+$("inflReal").addEventListener("click", function(){ usarCPI=true; $("inflReal").setAttribute("aria-pressed","true"); $("inflFija").setAttribute("aria-pressed","false"); });
+$("ordA").addEventListener("click", function(){ orden="A"; $("ordA").setAttribute("aria-pressed","true"); $("ordB").setAttribute("aria-pressed","false"); });
+$("ordB").addEventListener("click", function(){ orden="B"; $("ordB").setAttribute("aria-pressed","true"); $("ordA").setAttribute("aria-pressed","false"); });
+$("calcular").addEventListener("click", calcular);
+$("btnVolver").addEventListener("click", function(){
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  $("fallback").classList.add("hidden"); $("msg").textContent="";
+  $("vistaRes").classList.add("hidden"); $("vistaCarga").classList.remove("hidden");
+  window.scrollTo(0,0); fijarTarget(parseInt($("target").value,10));
+});
+$("btnPdf").addEventListener("click", function(){
+  if(!ultimo){ aviso("Calcule primero."); return; }
+  try{
+    var blob = new Blob([construirPDF(itemsInforme())], {type:"application/pdf"});
+    var url = URL.createObjectURL(blob);
+    var nombre = "simulacion-" + new Date().toISOString().slice(0,10) + ".pdf";
+    var a = document.createElement("a"); a.href=url; a.download=nombre;
+    document.body.appendChild(a); a.click(); a.remove();
+    $("msg").innerHTML = "";
+    var link = document.createElement("a");
+    link.href=url; link.download=nombre; link.target="_blank";
+    link.textContent = "Si no se descargó solo, toque acá para abrir " + nombre;
+    link.style.cssText = "display:inline-block;margin-top:6px;font-size:16px;font-weight:700;color:#1D4ED8";
+    $("msg").appendChild(link);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 120000);
+  }catch(e){ aviso("No se pudo generar el PDF: " + e.message); }
+});
+$("btnGuardar").addEventListener("click", function(){
+  if(!ultimo){ aviso("Calcule primero."); return; }
+  var g = leerGuardados();
+  if(g.length >= 6){ aviso("Ya hay 6 escenarios guardados. Borre los anteriores para agregar otro."); return; }
+  g.push(resumenEscenario());
+  escribirGuardados(g);
+  pintarComparacion();
+  aviso("Guardado. Hay " + g.length + (g.length===1 ? " escenario." : " escenarios para comparar."));
+  $("cardComp").scrollIntoView({block:"start"});
+});
+[].forEach.call(document.querySelectorAll(".borrarComp"), function(b){
+  b.addEventListener("click", function(){
+    escribirGuardados([]);
+    try{ localStorage.removeItem(CLAVE); }catch(e){}
+    pintarComparacion();
+    aviso("Escenarios borrados.");
+  });
+});
+$("btnShare").addEventListener("click", function(){
+  if(!ultimo){ aviso("Calcule primero."); return; }
+  var t = textoResumen(); aviso("");
+  function copiado(){
+    $("btnShare").textContent="Copiado"; aviso("Resumen copiado al portapapeles.");
+    setTimeout(function(){ $("btnShare").textContent="Compartir resumen"; },1800);
+  }
+  function intentar(){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(copiado).catch(function(){
+        if(copiarViejo(t)) copiado(); else mostrarFallback(t);
+      });
+    } else if(copiarViejo(t)) copiado(); else mostrarFallback(t);
+  }
+  if(navigator.share){
+    navigator.share({title:"Simulación de capital y retiros", text:t}).then(function(){ aviso(""); })
+      .catch(function(err){ if(!err || err.name!=="AbortError") intentar(); });
+    return;
+  }
+  intentar();
+});
+["capital","anios","cagr","infl","retMonto","retAnio","retSem","nivel","corridas","bloque"].forEach(function(id){
+  $(id).addEventListener("input", validar);
+  $(id).addEventListener("change", validar);
+});
+window.addEventListener("resize", function(){
+  if(ultimo && !$("vistaRes").classList.contains("hidden")){
+    dibujarCapital(ultimo.cfg, ultimo.simDet);
+    dibujarFan(ultimo.cfg, ultimo.bandas, ultimo.simDet.serie);
+  }
+});
+
+crearFila($("filasAportes"),2,1,10000,"Monto USD");
+crearFila($("filasAportes"),3,1,10000,"Monto USD");
+crearFila($("filasAportes"),4,1,10000,"Monto USD");
+refrescarVacios();
+validar();
+pintarComparacion();
+})();
+</script>
+</body>
+</html>
