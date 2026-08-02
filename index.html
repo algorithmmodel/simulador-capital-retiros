@@ -103,6 +103,12 @@
   .modo .cifras div{border-top:2px solid var(--line);padding-top:8px}
   .modo .cifras .et{font-size:13px;color:var(--ink-2);font-weight:600}
   .modo .cifras .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+  .modo .req{border-top:2px solid var(--line);padding-top:8px;margin-top:10px}
+  .modo .req .et{font-size:13px;color:var(--ink-2);font-weight:600}
+  .modo .req .linea{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .modo .req .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+  .modo .req .delta{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+  .modo .req .delta.exc{color:var(--verde)} .modo .req .delta.def{color:var(--rojo)}
   .modo.d{border-color:var(--line)} .modo.d .nom{color:var(--ink)}
   .modo.h{border-color:var(--azul)} .modo.h .nom{color:var(--azul)}
   .modo.m{border-color:var(--naranja)} .modo.m .nom{color:var(--naranja)}
@@ -844,12 +850,26 @@ function correr(){
     '<div class="det2">'+detTxt+'</div>';
 
   /* tres modelos */
+  /* Capital requerido: cuánto habría que tener invertido para que el retiro que
+     cargó el usuario fuera exactamente el sostenible de ese modelo. Sale de una
+     proporción porque el motor es lineal en los montos: escalar capital, aportes
+     y retiro por la misma constante escala el sostenible por esa constante. */
+  function filaRequerido(sost){
+    if(sost === null || !(sost > 0) || !(cfg.retBase > 0)) return "";
+    var necesario = invertido * (cfg.retBase / sost);
+    var delta = invertido - necesario, sobra = delta >= 0;
+    return '<div class="req">' +
+      '<div class="et">Capital requerido para ' + usd(cfg.retBase) + ' de retiro</div>' +
+      '<div class="linea"><span class="nu">' + usd(necesario) + '</span>' +
+      '<span class="delta ' + (sobra ? "exc" : "def") + '">' +
+      (sobra ? "excedente de " : "déficit de ") + usd(Math.abs(delta)) + '</span></div></div>';
+  }
   function bloqueModo(clase, nombre, detalle, sost, tasa, extra){
     return '<div class="modo '+clase+'"><div class="nom">'+nombre+'</div>' +
       '<div class="det">'+detalle+'</div><div class="cifras">' +
       '<div><div class="et">Retiro sostenible</div><div class="nu">'+(sost===null?"—":usd(sost))+'</div></div>' +
       '<div><div class="et">'+(extra||"Éxito de su plan")+'</div><div class="nu">'+tasa+'</div></div>' +
-      '</div></div>';
+      '</div>' + filaRequerido(sost) + '</div>';
   }
   $("modos").innerHTML =
     bloqueModo("d","CAGR fijo", pc(cfg.cagr)+" todos los años, sin variación",
@@ -1073,6 +1093,19 @@ function itemsInforme(){
   it.push({tipo:"kv", k:"CAGR fijo "+pc(c.cagr), v: ultimo.sostDet===null?"No alcanzable":usd(ultimo.sostDet)});
   it.push({tipo:"kv", k:"Histórico, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostH===null?"No alcanzable":usd(ultimo.sostH)});
   it.push({tipo:"kv", k:"Monte Carlo, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostM===null?"No alcanzable":usd(ultimo.sostM)});
+
+  if(c.retBase > 0){
+    it.push({tipo:"seccion", texto:"Capital requerido para " + usd(c.retBase) + " de retiro"});
+    [["CAGR fijo", ultimo.sostDet], ["Histórico", ultimo.sostH], ["Monte Carlo", ultimo.sostM]]
+      .forEach(function(f){
+        var v = "No alcanzable";
+        if(f[1] !== null && f[1] > 0){
+          var nec = ultimo.invertido * (c.retBase / f[1]), d = ultimo.invertido - nec;
+          v = usd(nec) + (d >= 0 ? "  (excedente de " : "  (déficit de ") + usd(Math.abs(d)) + ")";
+        }
+        it.push({tipo:"kv", k:f[0], v:v});
+      });
+  }
 
   it.push({tipo:"seccion", texto:"Su plan"});
   it.push({tipo:"destacado", k:"PROBABILIDAD DE ÉXITO (HISTÓRICO)", v: pc0(ultimo.tasaH),
