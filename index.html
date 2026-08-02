@@ -94,6 +94,7 @@
   .kpi.azul{border-color:var(--azul)} .kpi.azul .v{color:var(--azul)}
   .kpi.naranja{border-color:var(--naranja)} .kpi.naranja .v{color:var(--naranja)}
   .kpi.verde{border-color:var(--verde)} .kpi.verde .v{color:var(--verde)}
+  .kpi.rojo{border-color:var(--rojo)} .kpi.rojo .v{color:var(--rojo)}
 
   .modo{background:#FFF;border:2px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
   .modo .nom{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
@@ -278,8 +279,8 @@
     </div>
   </section>
 
-  <div class="kpi verde">
-    <div class="k">Su plan: probabilidad de éxito</div>
+  <div class="kpi verde" id="kExitoBox">
+    <div class="k">Su plan: éxito en el backtest histórico</div>
     <div class="v" id="kExito"></div>
     <div class="n" id="kExitoN"></div>
   </div>
@@ -365,7 +366,7 @@
     <button type="button" id="btnVolver">Volver a editar</button>
   </div>
 
-  <p class="nota">Serie del S&amp;P 500 1928–2024, retornos totales. La inflación se mantiene constante en todos los modelos: lo que varía es el orden de los retornos. No es asesoramiento financiero.</p>
+  <p class="nota" id="notaFinal">Serie del S&amp;P 500 1928–2024, retornos totales. No es asesoramiento financiero.</p>
 </div>
 
 <script>
@@ -803,18 +804,28 @@ function correr(){
   var real = (1+cfg.cagr)/(1+cfg.infl) - 1;
   var nRet = Math.max(0, cfg.n - cfg.startP + 1);
 
-  /* estado */
+  /* estado.
+     El mensaje nombra siempre los dos modelos y cuál de los dos queda por
+     debajo del nivel exigido. Antes escribía la cifra del histórico en todos
+     los casos, así que un plan con el histórico en 96,2% y el Monte Carlo en
+     88,8% mostraba "96,2%, por debajo del 90% exigido", que es falso. */
   var est = $("estado"), cls, txt;
-  if(tasaH >= cfg.nivel && tasaM >= cfg.nivel){
+  var nivelPct = Math.round(cfg.nivel*100);
+  var pasaH = tasaH >= cfg.nivel, pasaM = tasaM >= cfg.nivel;
+  var leH = okH + " de " + setsH.length + " ventanas históricas (" + pc0(tasaH) + ")";
+  var leM = pc0(tasaM) + " de las corridas de Monte Carlo";
+  if(pasaH && pasaM){
     cls = "ok";
-    txt = "Su plan aguanta: sobrevivió en " + okH + " de " + setsH.length + " ventanas históricas.";
-  } else if(tasaH >= 0.75 || tasaM >= 0.75){
+    txt = "Su plan supera el " + nivelPct + "% exigido en los dos modelos: " + leH + " y " + leM + ".";
+  } else if(pasaH || pasaM){
     cls = "warn";
-    txt = "Al límite: sobrevivió en " + okH + " de " + setsH.length + " ventanas (" + pc0(tasaH) +
-      "), por debajo del " + Math.round(cfg.nivel*100) + "% exigido.";
+    txt = "Al límite: " + (pasaH
+      ? "el backtest histórico llega al " + pc0(tasaH) + ", pero el Monte Carlo se queda en " + pc0(tasaM)
+      : "el Monte Carlo llega al " + pc0(tasaM) + ", pero el backtest histórico se queda en " + pc0(tasaH)) +
+      ", por debajo del " + nivelPct + "% exigido.";
   } else {
     cls = "bad";
-    txt = "Su plan falla en la historia: solo " + okH + " de " + setsH.length + " ventanas (" + pc0(tasaH) + ") llegaron al objetivo.";
+    txt = "Su plan no alcanza el " + nivelPct + "% exigido en ninguno de los dos modelos: " + leH + " y " + leM + ".";
   }
   var detTxt;
   if(simDet.agotado)
@@ -863,6 +874,8 @@ function correr(){
   }
 
   var brecha = (sostDet!==null && sostH!==null && sostDet>0) ? (1 - sostH/sostDet) : null;
+  /* el color acompaña al estado: en verde solo si el plan pasa los dos modelos */
+  $("kExitoBox").className = "kpi " + (cls === "ok" ? "verde" : cls === "warn" ? "naranja" : "rojo");
   $("kExito").textContent = pc0(tasaH);
   $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " por semestre desde " + etiquetaPeriodo(cfg.startP) + ". " +
     (brecha===null ? "" : "El CAGR fijo permitiría retirar un " + (brecha*100).toFixed(0) +
@@ -945,6 +958,11 @@ function correr(){
       "</td><td>"+(s.retiro?usd(s.retiro):"—")+"</td><td>"+usd(s.nominal)+"</td><td>"+usd(s.real)+"</td>";
     tb.appendChild(tr);
   });
+
+  $("notaFinal").textContent = "Serie del S&P 500 1928–2024, retornos totales. " + (usarCPI
+    ? "El backtest y el Monte Carlo usan el IPC real de cada año; el modelo de CAGR fijo usa la inflación constante que cargó."
+    : "La inflación se mantiene constante en los tres modelos: lo que varía es el orden de los retornos.") +
+    " No es asesoramiento financiero.";
 
   $("calcular").textContent = "Calcular los tres modelos";
   $("vistaCarga").classList.add("hidden");
@@ -1113,7 +1131,9 @@ function itemsInforme(){
   });
 
   it.push({tipo:"espacio", n:16});
-  it.push({tipo:"texto", texto:"La inflación se mantiene constante en los tres modelos: lo que varía es el orden de los retornos."});
+  it.push({tipo:"texto", texto: usarCPI
+    ? "El backtest y el Monte Carlo usan el IPC real de cada año; el modelo de CAGR fijo usa la inflación constante cargada."
+    : "La inflación se mantiene constante en los tres modelos: lo que varía es el orden de los retornos."});
   it.push({tipo:"texto", texto:"Las ventanas históricas se solapan, así que el porcentaje describe la historia disponible, no una probabilidad."});
   it.push({tipo:"texto", texto:"No es asesoramiento financiero. El rendimiento pasado no predice el futuro."});
   return it;
