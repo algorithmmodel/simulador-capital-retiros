@@ -202,6 +202,8 @@ Se guarda **solo el resumen**, no la simulación entera: alcanza para comparar y
 
 ## 11. Ideas pendientes (ninguna aprobada)
 
+- **Mostrar los tramos del retiro sostenible cuando hay ajustes cargados.** Planteado el 2 de agosto de 2026 y postergado. `escala` multiplica el retiro base **y todos los ajustes**, así que el sostenible escala la forma del plan completa. Con un plan de tres tramos —50.000 desde el año 2, 100.000 desde el 6, 90.000 desde el 10— y un factor histórico de 1,28, la pantalla muestra solo `$63.982`, cuando el plan sostenible real es 63.982 → 127.964 → 115.168. Leído aislado, ese número se interpreta como "puede retirar 63.982 por semestre durante todo el horizonte", que es falso. La solución acordada: una línea con los tres tramos debajo del sostenible, visible **solo si hay ajustes cargados**.
+- **Aclarar el rótulo del campo de ajustes.** Hoy dice "Nuevo retiro USD" y la sección se llama "Ajustes puntuales del retiro". Un ajuste **reemplaza** el retiro anterior y reinicia la indexación desde esa fecha; no se suma al anterior. La palabra "ajuste" invita a leerlo como monto adicional. Candidatos: cambiar el rótulo a "Pasa a retirar USD", o agregar una línea de ayuda con "reemplaza el retiro anterior; para sumar, cargue el monto total".
 - Pasar el escenario por la querystring, para compartir un caso por link.
 - Web Worker para el cálculo, si crece la cantidad de corridas.
 - Exportar CSV de la tabla semestral.
