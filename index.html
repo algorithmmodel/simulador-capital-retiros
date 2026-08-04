@@ -838,6 +838,10 @@ function correr(){
     detTxt = "CAGR fijo: capital agotado en " + etiquetaPeriodo(simDet.pAgot) + "." +
       (simDet.finalNominal > 0 ? " Los aportes posteriores lo recuperan hasta " +
         usd(simDet.finalNominal) + ", pero el plan ya se quedó sin fondos una vez." : "");
+  else if(objetivo <= 0)
+    /* con el objetivo en 0% no hay nada que cumplir ni nada que sobre: lo único
+       que se está midiendo es que el capital no se agote antes del final */
+    detTxt = "CAGR fijo: el capital no se agota y termina en " + usd(simDet.finalNominal) + ".";
   else if(simDet.finalNominal >= objetivo)
     detTxt = "CAGR fijo: objetivo cumplido, sobran " + usd(simDet.finalNominal - objetivo) + ".";
   else if(simDet.finalNominal >= objetivo*0.85)
