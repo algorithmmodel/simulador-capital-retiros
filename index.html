@@ -905,8 +905,14 @@ function correr(){
     (brecha===null ? "" : "El CAGR fijo permitiría retirar un " + (brecha*100).toFixed(0) +
      "% más que el histórico al " + Math.round(cfg.nivel*100) + "% de éxito: esa diferencia es el precio del seguro.");
 
-  $("resSub").textContent = usd(cfg.capital) + " iniciales · " + cfg.anios + " años · objetivo " +
-    cfg.targetPct + "% (" + usd(objetivo) + ") · inflación " + pc(cfg.infl);
+  /* El encabezado muestra el capital invertido, no el inicial: con aportes
+     grandes, decir solo "1.000.000 iniciales" subrepresenta lo que se puso y
+     descoloca la lectura de todo el resto del informe. */
+  var totalAportes = invertido - cfg.capital;
+  $("resSub").textContent = usd(invertido) + " invertidos" +
+    (totalAportes > 0 ? " (" + usd(cfg.capital) + " iniciales + " + usd(totalAportes) + " en aportes)" : "") +
+    " · " + cfg.anios + " años · objetivo " + cfg.targetPct + "% (" + usd(objetivo) + ")" +
+    " · inflación " + pc(cfg.infl);
 
   var realesH = corridasH.map(function(x){ return x.sim.finalReal; });
   var medNom = percentil(finalesH, 0.50), medReal = percentil(realesH, 0.50);
@@ -1089,7 +1095,10 @@ function construirPDF(items){
 function itemsInforme(){
   var c=ultimo.cfg, s=ultimo.simDet, it=[];
   it.push({tipo:"titulo", texto:"Simulación de capital y retiros"});
-  it.push({tipo:"sub", texto: usd(c.capital)+" iniciales · "+c.anios+" años · objetivo "+c.targetPct+"% ("+usd(ultimo.objetivo)+")"});
+  var apPdf = ultimo.invertido - c.capital;
+  it.push({tipo:"sub", texto: usd(ultimo.invertido)+" invertidos" +
+    (apPdf > 0 ? " ("+usd(c.capital)+" iniciales + "+usd(apPdf)+" en aportes)" : "") +
+    " · "+c.anios+" años · objetivo "+c.targetPct+"% ("+usd(ultimo.objetivo)+")"});
   it.push({tipo:"sub", texto:"Generado el "+new Date().toLocaleDateString("es-AR")+
     " · serie S&P 500 1928-2024, retornos totales"});
 
