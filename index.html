@@ -757,11 +757,33 @@ function dibujarFan(cfg, bandas, detSerie){
   c.g.fillText("Años", (c.w+m.l)/2, c.h-14);
 }
 
-/* ---------- calcular ---------- */
+/* ---------- calcular ----------
+   Si el cálculo falla, sin esta red el botón se quedaba en "Calculando…" para
+   siempre y no había forma de enterarse de nada, menos todavía en el teléfono.
+   Ahora vuelve a la pantalla de carga y muestra el motivo. */
 function calcular(){
   if(!validar()) return;
   $("calcular").textContent = "Calculando…";
-  setTimeout(correr, 30);
+  setTimeout(function(){
+    try{
+      correr();
+    }catch(e){
+      $("calcular").textContent = "Calcular los tres modelos";
+      $("calcular").disabled = false;
+      $("calcular").style.opacity = 1;
+      $("vistaRes").classList.add("hidden");
+      $("vistaCarga").classList.remove("hidden");
+      var box = $("avisos");
+      box.innerHTML = "";
+      var d = document.createElement("div");
+      d.className = "aviso";
+      d.textContent = "No se pudo completar el cálculo: " +
+        ((e && e.message) ? e.message : String(e)) +
+        ". Revise los datos cargados y vuelva a intentar.";
+      box.appendChild(d);
+      window.scrollTo(0,0);
+    }
+  }, 30);
 }
 
 function correr(){
