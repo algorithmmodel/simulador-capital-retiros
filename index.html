@@ -100,16 +100,29 @@
   .modo{background:#FFF;border:2px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
   .modo .nom{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
   .modo .det{font-size:14px;color:var(--ink-2);margin-top:2px}
-  .modo .cifras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-  .modo .cifras div{border-top:2px solid var(--line);padding-top:8px}
-  .modo .cifras .et{font-size:13px;color:var(--ink-2);font-weight:600}
-  .modo .cifras .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
-  .modo .req{border-top:2px solid var(--line);padding-top:8px;margin-top:10px}
-  .modo .req .et{font-size:13px;color:var(--ink-2);font-weight:600}
-  .modo .req .linea{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-  .modo .req .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
-  .modo .req .delta{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-  .modo .req .delta.exc{color:var(--verde)} .modo .req .delta.def{color:var(--rojo)}
+  /* Grilla de 2 columnas por 2 filas: los dos rótulos comparten la primera fila
+     y los dos números la segunda, así los números arrancan siempre a la misma
+     altura aunque un rótulo o un número ocupe dos renglones. (Antes cada celda
+     era una columna propia y el borde se dibujaba doble.) */
+  .modo .cifras{display:grid;grid-template-columns:1fr 1fr;column-gap:10px;margin-top:10px}
+  .modo .cifras .et{font-size:13px;color:var(--ink-2);font-weight:600;border-top:2px solid var(--line);padding-top:8px}
+  .modo .cifras .nu{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;padding-top:2px;align-self:start}
+  .modo .pie{border-top:2px solid var(--line);padding-top:8px;margin-top:10px}
+  .modo .pie .sale{font-size:15px;color:var(--ink-2)}
+  .modo .pie .sale b{font-size:18px;color:var(--azul);font-variant-numeric:tabular-nums}
+  .modo .pie .saldo{font-size:18px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+  .modo .pie .saldo.sobra{color:var(--verde)} .modo .pie .saldo.falta{color:var(--rojo)}
+  .banda{font-size:14px;font-weight:700;color:var(--ink-2);background:#FFF;border:2px dashed var(--line);
+    border-radius:8px;padding:8px 10px;margin:0 0 12px}
+  #capFinal .par{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:2px solid var(--line);padding:8px 0 4px;margin-top:8px}
+  #capFinal .lb{font-size:13px;color:var(--ink-2);font-weight:600}
+  #capFinal .v{font-size:20px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
+  #capFinal .v.max{color:var(--azul)}
+  #capFinal .pc{font-size:16px;font-weight:700;color:var(--naranja);margin-top:2px;font-variant-numeric:tabular-nums}
+  #capFinal .pcl{font-size:12px;color:var(--ink-2)}
+  #capFinal .peor{font-size:13px;color:var(--ink-2);margin-top:4px}
+  #capFinal .peor b{font-variant-numeric:tabular-nums}
+  #capFinal .peor b.ok{color:var(--verde)} #capFinal .peor b.mal{color:var(--rojo)}
   .modo.d{border-color:var(--line)} .modo.d .nom{color:var(--ink)}
   .modo.h{border-color:var(--azul)} .modo.h .nom{color:var(--azul)}
   .modo.m{border-color:var(--naranja)} .modo.m .nom{color:var(--naranja)}
@@ -208,9 +221,9 @@
   <section class="card">
     <h2>Retiros</h2>
     <div class="field">
-      <label for="retMonto">Retiro semestral (USD de hoy)</label>
+      <label for="retMonto">Retiro semestral (USD)</label>
       <input id="retMonto" type="number" inputmode="decimal" value="2400" min="0" step="500">
-      <p class="hint">En dólares de hoy. Cada retiro se ajusta por la inflación acumulada hasta ese semestre, así compra siempre lo mismo.</p>
+      <p class="hint">En poder de compra actual.</p>
     </div>
     <div class="grid2">
       <div class="field"><label for="retAnio">Año de inicio</label>
@@ -219,6 +232,7 @@
         <select id="retSem"><option value="1">1</option><option value="2">2</option></select></div>
     </div>
     <h2 style="margin-top:22px">Ajustes puntuales del retiro</h2>
+    <p class="hint" style="margin:-8px 0 12px">También en poder de compra actual.</p>
     <div class="filas" id="filasAjustes"></div>
     <button class="ghost small" type="button" id="addAjuste">Agregar ajuste</button>
   </section>
@@ -235,6 +249,11 @@
     </div>
     <input type="range" id="target" min="0" max="100" step="5" value="100"
            aria-label="Porcentaje del capital invertido a preservar">
+    <div class="field" style="margin:16px 0 0">
+      <label for="objMonto">Objetivo en USD (opcional)</label>
+      <input id="objMonto" type="number" inputmode="decimal" min="0" step="10000" placeholder="Vacío: usa el porcentaje">
+      <p class="hint">Si escribe un monto, manda ese y el deslizante no se usa.</p>
+    </div>
     <p class="target-read hint" id="tRead"></p>
   </section>
 
@@ -278,6 +297,7 @@
 
   <section class="card">
     <h2>Retiro sostenible según el modelo</h2>
+    <p class="banda">Retiros en poder de compra actual</p>
     <div id="modos"></div>
     <p class="hint" id="modosNota"></p>
     <div class="kpi azul" style="margin:14px 0 0">
@@ -293,24 +313,18 @@
     <div class="n" id="kExitoN"></div>
   </div>
 
-  <div class="kpi">
-    <div class="k">Capital final nominal</div>
-    <div class="v" id="kNom"></div>
-    <div class="n" id="kNomN"></div>
-  </div>
-
-  <div class="kpi naranja">
-    <div class="k">Capital final real (poder de compra de hoy)</div>
-    <div class="v" id="kReal"></div>
-    <div class="n" id="kRealN"></div>
-  </div>
+  <section class="card">
+    <h2 id="cfTitulo">Capital al final</h2>
+    <p class="banda" id="cfBanda"></p>
+    <div id="capFinal"></div>
+  </section>
 
   <section class="card">
     <h2>Evolución del capital (CAGR fijo)</h2>
     <canvas id="chartCap" height="300"></canvas>
     <div class="leyenda">
       <span><i class="lg1"></i>Nominal</span>
-      <span><i class="lg5"></i>Real (poder de compra de hoy)</span>
+      <span><i class="lg5"></i>Real (poder de compra actual)</span>
     </div>
     <p class="hint">Su plan tal como lo cargó, con el mercado rindiendo el CAGR fijo todos los años.</p>
   </section>
@@ -329,7 +343,7 @@
 
   <section class="card">
     <h2>Capital final en las ventanas históricas</h2>
-    <p class="hint" style="margin:-6px 0 10px">Nominal arriba, poder de compra de hoy abajo.</p>
+    <p class="hint" style="margin:-6px 0 10px">Nominal arriba, poder de compra actual abajo.</p>
     <dl class="datos" id="percentiles"></dl>
   </section>
 
@@ -641,16 +655,40 @@ function leerCfg(){
     retBase: num($("retMonto")),
     startP: periodo(Math.max(1,Math.round(num($("retAnio")))), parseInt($("retSem").value,10)),
     targetPct: parseInt($("target").value,10),
+    objMonto: leerObjMonto(),
     nivel: Math.min(100,Math.max(50,num($("nivel"))))/100,
     corridas: Math.min(5000,Math.max(200,Math.round(num($("corridas"))))),
     bloque: Math.min(15,Math.max(1,Math.round(num($("bloque")))))
   };
 }
 
+/* Objetivo en dólares: null si el campo está vacío, NaN si lo escrito no es un
+   número (lo marca la validación), o el monto. */
+function leerObjMonto(){
+  var t = String($("objMonto").value).trim();
+  if(t === "") return null;
+  var v = parseFloat(t.replace(",", "."));
+  return isFinite(v) ? v : NaN;
+}
+function invertidoDe(c){
+  return c.capital + c.aportes.reduce(function(s,a){ return s + (a.p<=c.n?a.monto:0); },0);
+}
+/* Objetivo vigente. Si el campo en dólares tiene valor, manda ese; si está
+   vacío, rige el porcentaje del deslizante. `pctTxt` es para mostrar: el
+   deslizante va de 5 en 5, el monto puede dar cualquier porcentaje. */
+function objetivoVigente(c, invertido){
+  if(c.objMonto !== null && isFinite(c.objMonto) && c.objMonto >= 0){
+    var p = invertido > 0 ? c.objMonto/invertido*100 : 0;
+    return {monto:c.objMonto, pctTxt:p.toFixed(1)+"%", fuente:"monto"};
+  }
+  return {monto:invertido*c.targetPct/100, pctTxt:c.targetPct+"%", fuente:"pct"};
+}
+
 /* ---------- validación ---------- */
 function validar(){
   var c = leerCfg(), errs = [];
   if(c.capital <= 0) errs.push("El capital inicial tiene que ser mayor a cero.");
+  if(c.objMonto !== null && !(c.objMonto >= 0)) errs.push("El objetivo en USD tiene que ser un número mayor o igual a cero.");
   if(!(c.anios > 0)) errs.push("El horizonte tiene que ser mayor a cero años.");
   if(c.infl < 0) errs.push("La inflación no puede ser negativa.");
   if(Math.ceil(c.anios) > SERIE.length)
@@ -692,13 +730,13 @@ function fijarTarget(v){
   actualizarTarget(leerCfg());
 }
 function actualizarTarget(c){
-  var pctT = parseInt($("target").value,10) || 0;
-  var invertido = c.capital + c.aportes.reduce(function(s,a){ return s + (a.p<=c.n?a.monto:0); },0);
-  var objNom = invertido * pctT/100;
-  var factor = Math.pow(1+c.is, c.n), objReal = objNom/factor;
+  var invertido = invertidoDe(c), ob = objetivoVigente(c, invertido);
+  var factor = Math.pow(1+c.is, c.n), objReal = ob.monto/factor;
   var pctReal = invertido>0 ? (objReal/invertido*100) : 0;
-  $("tRead").innerHTML = "Objetivo: <b>"+usd(objNom)+"</b> nominales sobre "+usd(invertido)+" invertidos.<br>" +
-    "En poder de compra de hoy son <b>"+usd(objReal)+"</b>, o sea el <b>"+pctReal.toFixed(0)+"%</b> de lo invertido.";
+  $("tRead").innerHTML = (ob.fuente === "monto"
+      ? "Manda el objetivo en USD: <b>"+usd(ob.monto)+"</b> nominales, el "+ob.pctTxt+" de "+usd(invertido)+" invertidos. El deslizante no se usa.<br>"
+      : "Objetivo: <b>"+usd(ob.monto)+"</b> nominales sobre "+usd(invertido)+" invertidos.<br>") +
+    "En poder de compra actual son <b>"+usd(objReal)+"</b>, o sea el <b>"+pctReal.toFixed(0)+"%</b> de lo invertido.";
 }
 
 /* ---------- gráfico ---------- */
@@ -799,8 +837,8 @@ function calcular(){
 
 function correr(){
   var cfg = leerCfg();
-  var invertido = cfg.capital + cfg.aportes.reduce(function(s,a){ return s + (a.p<=cfg.n?a.monto:0); },0);
-  var objetivo = invertido * cfg.targetPct/100;
+  var invertido = invertidoDe(cfg);
+  var ob = objetivoVigente(cfg, invertido), objetivo = ob.monto;
 
   var baseRef = (cfg.retBase > 0 ? cfg.retBase : 1);
   function aMonto(k){ return k === null ? null : baseRef * k; }
@@ -808,7 +846,8 @@ function correr(){
   /* 1. determinístico: siempre con la inflación constante que cargó el usuario */
   var setDet = setConstante(cfg.cagr, cfg.anios);
   var simDet = simular(cfg, setDet, 1, cfg.acum);
-  var sostDet = aMonto(sostenibleDeterminista(cfg, setDet, objetivo));
+  var kDet = sostenibleDeterminista(cfg, setDet, objetivo);
+  var sostDet = aMonto(kDet);
 
   /* 2. histórico */
   var setsH = ventanasHistoricas(cfg.anios, cfg, usarCPI);
@@ -818,16 +857,32 @@ function correr(){
   });
   var okH = corridasH.filter(function(x){ return x.ok; }).length;
   var tasaH = setsH.length ? okH/setsH.length : 0;
-  var sostH = setsH.length ? aMonto(sostenibleNivel(cfg, setsH, objetivo, cfg.nivel)) : null;
+  var kH = setsH.length ? sostenibleNivel(cfg, setsH, objetivo, cfg.nivel) : null;
+  var sostH = aMonto(kH);
 
-  /* 3. Monte Carlo. Se cuentan los éxitos sobre la marcha: guardar las mil
-     simulaciones completas era medio millón de objetos que no se usaban. */
+  /* 3. Monte Carlo. De cada corrida se guardan solo los dos capitales finales
+     (para la mediana y el peor caso), no la simulación completa: eso eran medio
+     millón de objetos que no se usaban. */
   var setsM = setsMonteCarlo(cfg.anios, cfg.corridas, cfg.bloque, 20260801, cfg, usarCPI);
-  var okM = 0;
-  for(var im=0; im<setsM.length; im++)
-    if(exitoso(simular(cfg, setsM[im].retornos, 1, setsM[im].acum), objetivo)) okM++;
+  var okM = 0, finNomM = [], finRealM = [];
+  for(var im=0; im<setsM.length; im++){
+    var simM = simular(cfg, setsM[im].retornos, 1, setsM[im].acum);
+    if(exitoso(simM, objetivo)) okM++;
+    finNomM.push(simM.finalNominal); finRealM.push(simM.finalReal);
+  }
   var tasaM = okM/setsM.length;
-  var sostM = aMonto(sostenibleNivel(cfg, setsM, objetivo, cfg.nivel));
+  var kM = sostenibleNivel(cfg, setsM, objetivo, cfg.nivel);
+  var sostM = aMonto(kM);
+
+  /* capitales finales retirando el máximo de cada modelo */
+  function finalesCon(sets, k){
+    var o = {n:[], r:[]};
+    for(var i=0;i<sets.length;i++){ var s = simular(cfg, sets[i].retornos, k, sets[i].acum); o.n.push(s.finalNominal); o.r.push(s.finalReal); }
+    return o;
+  }
+  var maxDet = kDet === null ? null : simular(cfg, setDet, kDet, cfg.acum);
+  var maxH = kH === null ? null : finalesCon(setsH, kH);
+  var maxM = kM === null ? null : finalesCon(setsM, kM);
 
   /* bandas del abanico (histórico) */
   var bandas = {p10:[], p50:[], p90:[]};
@@ -887,26 +942,30 @@ function correr(){
     '<div class="det2">'+detTxt+'</div>';
 
   /* tres modelos */
-  /* Capital requerido: cuánto habría que tener invertido para que el retiro que
-     cargó el usuario fuera exactamente el sostenible de ese modelo. Sale de una
-     proporción porque el motor es lineal en los montos: escalar capital, aportes
-     y retiro por la misma constante escala el sostenible por esa constante. */
-  function filaRequerido(sost){
-    if(sost === null || !(sost > 0) || !(cfg.retBase > 0)) return "";
-    var necesario = invertido * (cfg.retBase / sost);
-    var delta = invertido - necesario, sobra = delta >= 0;
-    return '<div class="req">' +
-      '<div class="et">Capital requerido para retirar ' + usd(cfg.retBase) + ' de hoy</div>' +
-      '<div class="linea"><span class="nu">' + usd(necesario) + '</span>' +
-      '<span class="delta ' + (sobra ? "exc" : "def") + '">' +
-      (sobra ? "excedente de " : "déficit de ") + usd(Math.abs(delta)) + '</span></div></div>';
+  /* Pie de cada tarjeta, dos renglones:
+     - lo que sale de la cuenta en el primer retiro si retirara el máximo de ese
+       modelo (el sostenible, que está en poder de compra actual, llevado por la
+       inflación cargada hasta ese semestre);
+     - cuánto capital sobra o falta para sostener el retiro planteado. Sale de
+       una proporción porque el motor es lineal en los montos: escalar capital,
+       aportes y retiro por la misma constante escala el sostenible igual. */
+  function pieModo(sost){
+    if(sost === null || !(sost > 0)) return "";
+    var h = '<div class="pie"><div class="sale">En ' + etiquetaPeriodo(cfg.startP) + ' sale: <b>' +
+      usd(sost * cfg.acum[cfg.startP]) + '</b></div>';
+    if(cfg.retBase > 0){
+      var delta = invertido - invertido * (cfg.retBase / sost), sobra = delta >= 0;
+      h += '<div class="saldo ' + (sobra ? "sobra" : "falta") + '">' + (sobra ? "Sobran " : "Faltan ") +
+        usd(Math.abs(delta)) + ' de capital</div>';
+    }
+    return h + '</div>';
   }
   function bloqueModo(clase, nombre, detalle, sost, tasa, extra){
     return '<div class="modo '+clase+'"><div class="nom">'+nombre+'</div>' +
       '<div class="det">'+detalle+'</div><div class="cifras">' +
-      '<div><div class="et">Retiro sostenible (de hoy)</div><div class="nu">'+(sost===null?"—":usd(sost))+'</div></div>' +
-      '<div><div class="et">'+(extra||"Éxito de su plan")+'</div><div class="nu">'+tasa+'</div></div>' +
-      '</div>' + filaRequerido(sost) + '</div>';
+      '<div class="et">Retiro sostenible</div><div class="et">'+(extra||"Éxito de su plan")+'</div>' +
+      '<div class="nu">'+(sost===null?"—":usd(sost))+'</div><div class="nu">'+tasa+'</div>' +
+      '</div>' + pieModo(sost) + '</div>';
   }
   $("modos").innerHTML =
     bloqueModo("d","CAGR fijo", pc(cfg.cagr)+" todos los años, sin variación",
@@ -925,16 +984,16 @@ function correr(){
       " nominales sin agotar el capital. Baje el objetivo o suba el capital inicial.";
   } else {
     $("kSost").textContent = usd(sostDet);
-    $("kSostN").textContent = "En dólares de hoy. Con la inflación cargada, el primer retiro sería de " +
+    $("kSostN").textContent = "En poder de compra actual. Con la inflación cargada, el primer retiro sería de " +
       usd(sostDet * cfg.acum[cfg.startP]) + " y el último de " + usd(sostDet * cfg.acum[cfg.n]) +
-      ". Usted planteó " + usd(cfg.retBase) + " de hoy.";
+      ". Usted planteó " + usd(cfg.retBase) + ".";
   }
 
   var brecha = (sostDet!==null && sostH!==null && sostDet>0) ? (1 - sostH/sostDet) : null;
   /* el color acompaña al estado: en verde solo si el plan pasa los dos modelos */
   $("kExitoBox").className = "kpi " + (cls === "ok" ? "verde" : cls === "warn" ? "naranja" : "rojo");
   $("kExito").textContent = pc0(tasaH);
-  $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " de hoy por semestre desde " + etiquetaPeriodo(cfg.startP) +
+  $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " por semestre (poder de compra actual) desde " + etiquetaPeriodo(cfg.startP) +
     ". Con la inflación cargada, el primer retiro es de " + usd(cfg.retBase * cfg.acum[cfg.startP]) + ". " +
     /* brecha = 1 - histórico/fijo: es cuánto MENOS permite el histórico, no cuánto
        más permite el fijo. Con 85.408 contra 185.016 da 54% menos; el fijo
@@ -948,21 +1007,56 @@ function correr(){
   var totalAportes = invertido - cfg.capital;
   $("resSub").textContent = usd(invertido) + " invertidos" +
     (totalAportes > 0 ? " (" + usd(cfg.capital) + " iniciales + " + usd(totalAportes) + " en aportes)" : "") +
-    " · " + cfg.anios + " años · objetivo " + cfg.targetPct + "% (" + usd(objetivo) + ")" +
+    " · " + cfg.anios + " años · objetivo " + ob.pctTxt + " (" + usd(objetivo) + ")" +
     " · inflación " + pc(cfg.infl);
 
   var realesH = corridasH.map(function(x){ return x.sim.finalReal; });
   var medNom = percentil(finalesH, 0.50), medReal = percentil(realesH, 0.50);
 
-  $("kNom").textContent = usd(simDet.finalNominal);
-  $("kNomN").textContent = "Con CAGR fijo. La mediana de las " + setsH.length + " ventanas históricas es " +
-    usd(medNom) + ". Objetivo: " + usd(objetivo) + " (" + cfg.targetPct + "% de lo invertido).";
-
-  $("kReal").textContent = usd(simDet.finalReal);
-  $("kRealN").textContent = "Con CAGR fijo, equivale al " +
-    (invertido>0 ? (simDet.finalReal/invertido*100).toFixed(0) : 0) + "% de lo invertido. " +
-    "Mediana histórica: " + usd(medReal) + ". La inflación multiplica los precios por " +
-    factorFinal.toFixed(2) + " en " + cfg.anios + " años.";
+  /* Capital al final: cada retiro emparejado con su capital final, para que no
+     se cruce el retiro planteado con el máximo. En el CAGR fijo el capital final
+     es exacto; en el histórico y Monte Carlo el número grande es la mediana y
+     debajo va el peor caso al nivel exigido, contra el objetivo. */
+  /* El "peor X%" (X = 100 − nivel exigido) no es un percentil interpolado: es
+     el caso ordenado que decide el éxito. Si al nivel exigido pueden fallar
+     como mucho `maxFallas` casos, se muestra el siguiente. Así el color coincide
+     siempre con el veredicto: con el percentil interpolado, el retiro máximo de
+     Monte Carlo mostraba 705.045 en rojo contra un objetivo de 706.000 aunque
+     cumplía por definición. */
+  function peorNivel(arr){
+    var a = arr.slice().sort(function(x,y){ return x-y; });
+    var maxFallas = a.length - Math.ceil(cfg.nivel * a.length - 1e-9);
+    return a[Math.max(0, Math.min(a.length-1, maxFallas))];
+  }
+  var peorEtq = "peor " + (100 - Math.round(cfg.nivel*100)) + "%";
+  function celdaFinal(nom, real, peor){
+    return '<div class="v">' + usd(nom) + '</div>' +
+      '<div class="pc">' + usd(real) + '</div><div class="pcl">poder de compra actual</div>' +
+      (peor === null ? '' : '<div class="peor">' + peorEtq + ': <b class="' + (peor >= objetivo ? 'ok' : 'mal') + '">' + usd(peor) + '</b></div>');
+  }
+  function parFinal(etiq, retiro, esMax, cuerpo){
+    return '<div class="par"><div><div class="lb">' + etiq + '</div><div class="v' + (esMax ? ' max' : '') + '">' + retiro + '</div></div>' +
+      '<div><div class="lb">Capital final</div>' + cuerpo + '</div></div>';
+  }
+  function tarjetaFinal(clase, nombre, detalle, plan, maxRet, max){
+    return '<div class="modo ' + clase + '"><div class="nom">' + nombre + '</div><div class="det">' + detalle + '</div>' +
+      parFinal("Su retiro", usd(cfg.retBase), false, plan) +
+      (maxRet === null ? parFinal("Retiro máximo", "No alcanzable", true, '<div class="v">—</div>')
+                       : parFinal("Retiro máximo", usd(maxRet), true, max)) + '</div>';
+  }
+  var P = percentil;
+  $("cfTitulo").textContent = "Capital al final · año " + cfg.anios;
+  $("cfBanda").textContent = "Retiros en poder de compra actual · capital final en dólares del año " + cfg.anios;
+  $("capFinal").innerHTML =
+    tarjetaFinal("d", "CAGR fijo", pc(cfg.cagr) + " todos los años",
+      celdaFinal(simDet.finalNominal, simDet.finalReal, null), sostDet,
+      maxDet ? celdaFinal(maxDet.finalNominal, maxDet.finalReal, null) : "") +
+    tarjetaFinal("h", "Backtest histórico", "Mediana de " + setsH.length + " ventanas",
+      celdaFinal(P(finalesH,.5), P(realesH,.5), peorNivel(finalesH)), sostH,
+      maxH ? celdaFinal(P(maxH.n,.5), P(maxH.r,.5), peorNivel(maxH.n)) : "") +
+    tarjetaFinal("m", "Monte Carlo", "Mediana de " + setsM.length + " corridas",
+      celdaFinal(P(finNomM,.5), P(finRealM,.5), peorNivel(finNomM)), sostM,
+      maxM ? celdaFinal(P(maxM.n,.5), P(maxM.r,.5), peorNivel(maxM.n)) : "");
 
   /* percentiles */
   var pctl = [
@@ -1040,7 +1134,15 @@ function correr(){
 
   ultimo = {cfg:cfg, simDet:simDet, sostDet:sostDet, sostH:sostH, sostM:sostM,
     tasaH:tasaH, tasaM:tasaM, okH:okH, nH:setsH.length, finalesH:finalesH, realesH:realesH,
-    peores:peores, objetivo:objetivo, invertido:invertido, real:real, bandas:bandas, factorFinal:factorFinal};
+    peores:peores, objetivo:objetivo, objPctTxt:ob.pctTxt, invertido:invertido, real:real, bandas:bandas, factorFinal:factorFinal,
+    capFinal:[
+      {nombre:"CAGR fijo", plan:[simDet.finalNominal, simDet.finalReal, null], maxRet:sostDet,
+        max: maxDet ? [maxDet.finalNominal, maxDet.finalReal, null] : null},
+      {nombre:"Histórico (mediana)", plan:[P(finalesH,.5), P(realesH,.5), peorNivel(finalesH)], maxRet:sostH,
+        max: maxH ? [P(maxH.n,.5), P(maxH.r,.5), peorNivel(maxH.n)] : null},
+      {nombre:"Monte Carlo (mediana)", plan:[P(finNomM,.5), P(finRealM,.5), peorNivel(finNomM)], maxRet:sostM,
+        max: maxM ? [P(maxM.n,.5), P(maxM.r,.5), peorNivel(maxM.n)] : null}
+    ]};
 }
 
 /* ---------- resumen de texto ---------- */
@@ -1051,8 +1153,8 @@ function textoResumen(){
     "Capital inicial: " + usd2(c.capital) + "\n" +
     "Horizonte: " + c.anios + " años · Inflación: " + pc(c.infl) + "\n" +
     "Capital total invertido: " + usd2(ultimo.invertido) + "\n" +
-    "Objetivo de capital final: " + usd2(ultimo.objetivo) + " (" + c.targetPct + "%)\n" +
-    "Retiro planteado: " + usd2(c.retBase) + " de hoy desde " + etiquetaPeriodo(c.startP) + "\n\n" +
+    "Objetivo de capital final: " + usd2(ultimo.objetivo) + " (" + ultimo.objPctTxt + ")\n" +
+    "Retiro planteado: " + usd2(c.retBase) + " (poder de compra actual) desde " + etiquetaPeriodo(c.startP) + "\n\n" +
     "RETIRO SOSTENIBLE\n" +
     "  CAGR fijo " + pc(c.cagr) + ": " + (ultimo.sostDet===null?"no alcanzable":usd2(ultimo.sostDet)) + "\n" +
     "  Histórico al " + Math.round(c.nivel*100) + "%: " + (ultimo.sostH===null?"no alcanzable":usd2(ultimo.sostH)) + "\n" +
@@ -1065,7 +1167,7 @@ function textoResumen(){
     "  Mediana: " + usd2(percentil(ultimo.finalesH,0.5)) + "\n" +
     "  Mejor: " + usd2(Math.max.apply(null, ultimo.finalesH)) + "\n" +
     "  CAGR fijo: " + usd2(s.finalNominal) + "\n\n" +
-    "CAPITAL FINAL REAL (poder de compra de hoy)\n" +
+    "CAPITAL FINAL (poder de compra actual)\n" +
     "  Mediana histórica: " + usd2(percentil(ultimo.realesH,0.5)) + "\n" +
     "  CAGR fijo: " + usd2(s.finalReal) + "\n";
 }
@@ -1135,31 +1237,42 @@ function itemsInforme(){
   var apPdf = ultimo.invertido - c.capital;
   it.push({tipo:"sub", texto: usd(ultimo.invertido)+" invertidos" +
     (apPdf > 0 ? " ("+usd(c.capital)+" iniciales + "+usd(apPdf)+" en aportes)" : "") +
-    " · "+c.anios+" años · objetivo "+c.targetPct+"% ("+usd(ultimo.objetivo)+")"});
+    " · "+c.anios+" años · objetivo "+ultimo.objPctTxt+" ("+usd(ultimo.objetivo)+")"});
   it.push({tipo:"sub", texto:"Generado el "+new Date().toLocaleDateString("es-AR")+
     " · serie S&P 500 " + ANIO0 + "-" + ANIO_FIN + ", retornos totales"});
 
-  it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo (de hoy)"});
+  it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo (poder de compra actual)"});
   it.push({tipo:"kv", k:"CAGR fijo "+pc(c.cagr), v: ultimo.sostDet===null?"No alcanzable":usd(ultimo.sostDet)});
   it.push({tipo:"kv", k:"Histórico, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostH===null?"No alcanzable":usd(ultimo.sostH)});
   it.push({tipo:"kv", k:"Monte Carlo, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostM===null?"No alcanzable":usd(ultimo.sostM)});
 
   if(c.retBase > 0){
-    it.push({tipo:"seccion", texto:"Capital requerido para retirar " + usd(c.retBase) + " de hoy"});
+    it.push({tipo:"seccion", texto:"Capital que sobra o falta para retirar " + usd(c.retBase)});
     [["CAGR fijo", ultimo.sostDet], ["Histórico", ultimo.sostH], ["Monte Carlo", ultimo.sostM]]
       .forEach(function(f){
         var v = "No alcanzable";
         if(f[1] !== null && f[1] > 0){
-          var nec = ultimo.invertido * (c.retBase / f[1]), d = ultimo.invertido - nec;
-          v = usd(nec) + (d >= 0 ? "  (excedente de " : "  (déficit de ") + usd(Math.abs(d)) + ")";
+          var d = ultimo.invertido - ultimo.invertido * (c.retBase / f[1]);
+          v = (d >= 0 ? "Sobran " : "Faltan ") + usd(Math.abs(d));
         }
         it.push({tipo:"kv", k:f[0], v:v});
       });
   }
 
+  it.push({tipo:"seccion", texto:"Capital al final (año " + c.anios + ")"});
+  ultimo.capFinal.forEach(function(m){
+    function fila(etq, retiro, vals){
+      it.push({tipo:"kv", k:m.nombre + " · " + etq + " " + retiro, v: vals ? usd(vals[0]) : "No alcanzable"});
+      if(vals) it.push({tipo:"kv", k:"      poder de compra actual", v:usd(vals[1])});
+      if(vals && vals[2] !== null) it.push({tipo:"kv", k:"      peor " + (100 - Math.round(c.nivel*100)) + "%", v:usd(vals[2])});
+    }
+    fila("su retiro", usd(c.retBase), m.plan);
+    fila("retiro máximo", m.maxRet === null ? "" : usd(m.maxRet), m.max);
+  });
+
   it.push({tipo:"seccion", texto:"Su plan"});
   it.push({tipo:"destacado", k:"PROBABILIDAD DE ÉXITO (HISTÓRICO)", v: pc0(ultimo.tasaH),
-    n: ultimo.okH+" de "+ultimo.nH+" ventanas llegaron al objetivo retirando "+usd(c.retBase)+" de hoy por semestre."});
+    n: ultimo.okH+" de "+ultimo.nH+" ventanas llegaron al objetivo retirando "+usd(c.retBase)+" por semestre (poder de compra actual)."});
   it.push({tipo:"kv", k:"Éxito Monte Carlo", v: pc0(ultimo.tasaM)});
 
   it.push({tipo:"seccion", texto:"Capital final nominal en las ventanas históricas"});
@@ -1171,7 +1284,7 @@ function itemsInforme(){
    ["CAGR fijo, para comparar", usd(s.finalNominal)]
   ].forEach(function(f){ it.push({tipo:"kv", k:f[0], v:f[1]}); });
 
-  it.push({tipo:"seccion", texto:"Capital final real (poder de compra de hoy)"});
+  it.push({tipo:"seccion", texto:"Capital final en poder de compra actual"});
   [["Peor ventana", usd(Math.min.apply(null,ultimo.realesH))],
    ["Percentil 10", usd(percentil(ultimo.realesH,0.10))],
    ["Mediana", usd(percentil(ultimo.realesH,0.50))],
@@ -1243,7 +1356,7 @@ function resumenEscenario(){
   return {
     capital:c.capital, anios:c.anios, retBase:c.retBase, startP:c.startP,
     cagr:c.cagr, infl:c.infl, targetPct:c.targetPct, nivel:c.nivel,
-    cpi:usarCPI, orden:orden, objetivo:ultimo.objetivo,
+    cpi:usarCPI, orden:orden, objetivo:ultimo.objetivo, objPctTxt:ultimo.objPctTxt,
     sostDet:ultimo.sostDet, sostH:ultimo.sostH, sostM:ultimo.sostM,
     tasaH:ultimo.tasaH, tasaM:ultimo.tasaM, okH:ultimo.okH, nH:ultimo.nH,
     finNom:ultimo.simDet.finalNominal, finReal:ultimo.simDet.finalReal
@@ -1252,8 +1365,8 @@ function resumenEscenario(){
 var FILAS_COMP = [
   ["Capital inicial",            function(e){ return usd(e.capital); }],
   ["Horizonte",                  function(e){ return e.anios + " años"; }],
-  ["Retiro planteado (de hoy)",  function(e){ return usd(e.retBase) + " desde " + etiquetaPeriodo(e.startP); }],
-  ["Objetivo de capital final",  function(e){ return usd(e.objetivo) + " (" + e.targetPct + "%)"; }],
+  ["Retiro planteado",           function(e){ return usd(e.retBase) + " desde " + etiquetaPeriodo(e.startP); }],
+  ["Objetivo de capital final",  function(e){ return usd(e.objetivo) + " (" + (e.objPctTxt || e.targetPct + "%") + ")"; }],
   ["CAGR e inflación",           function(e){ return pc(e.cagr) + " / " + pc(e.infl); }],
   ["Inflación histórica",        function(e){ return e.cpi ? "IPC real" : "constante"; }],
   ["Sostenible · CAGR fijo",     function(e){ return e.sostDet===null ? "—" : usd(e.sostDet); }],
@@ -1299,7 +1412,7 @@ function copiarViejo(t){
 }
 
 $("addAporte").addEventListener("click", function(){ crearFila($("filasAportes"),2,1,0,"Monto USD"); refrescarVacios(); validar(); });
-$("addAjuste").addEventListener("click", function(){ crearFila($("filasAjustes"),2,1,0,"Nuevo retiro USD de hoy"); refrescarVacios(); validar(); });
+$("addAjuste").addEventListener("click", function(){ crearFila($("filasAjustes"),2,1,0,"Nuevo retiro USD"); refrescarVacios(); validar(); });
 $("target").addEventListener("input", function(){ $("tNum").value=$("target").value; actualizarTarget(leerCfg()); });
 $("target").addEventListener("change", function(){ fijarTarget(parseInt($("target").value,10)); });
 $("tNum").addEventListener("input", function(){
@@ -1376,7 +1489,7 @@ $("btnShare").addEventListener("click", function(){
   }
   intentar();
 });
-["capital","anios","cagr","infl","retMonto","retAnio","retSem","nivel","corridas","bloque"].forEach(function(id){
+["capital","anios","cagr","infl","retMonto","retAnio","retSem","nivel","corridas","bloque","objMonto"].forEach(function(id){
   $(id).addEventListener("input", validar);
   $(id).addEventListener("change", validar);
 });
