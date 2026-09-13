@@ -13,7 +13,7 @@ Corre **tres modelos con los mismos datos** y muestra los resultados juntos:
 | **Backtest histórico** | Cada ventana consecutiva del S&P 500 entre 1928 y 2025 (79 ventanas de 20 años). |
 | **Monte Carlo** | Bootstrap por bloques: tramos consecutivos de la historia real, sorteados. |
 
-La diferencia entre el primero y los otros dos es el punto del proyecto. Con la configuración por defecto, el modelo de CAGR fijo permite retirar un 40% más que el histórico exigiendo 90% de éxito. Esa diferencia es el costo de planificar contra la peor secuencia posible en vez de contra el promedio.
+La diferencia entre el primero y los otros dos es el punto del proyecto. Con la configuración por defecto, exigiendo 90% de éxito el histórico permite retirar un 40% menos que el modelo de CAGR fijo. Esa diferencia es el costo de planificar contra la peor secuencia posible en vez de contra el promedio.
 
 ## Uso
 

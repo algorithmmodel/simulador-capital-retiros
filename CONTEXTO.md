@@ -205,7 +205,7 @@ Con los defaults pero el selector de inflación en **IPC real de cada año**: é
 
 Y para el agotamiento con recuperación (sección 7): capital 100.000, retiro 40.000 desde el año 1 semestre 1, un único aporte de 2.000.000 en el año 10 semestre 2, 20 años, CAGR 9%, inflación 3%, orden A. El capital tiene que agotarse en **Año 2 / S1**, quedar en cero hasta el Año 10 / S1, y terminar en **2.899.899** con `agotado` en `true`. Si el capital final da 0, alguien repuso el `break`.
 
-Los 40% de diferencia entre el CAGR fijo y el histórico son el punto central del proyecto: es el costo de planificar contra la peor secuencia posible en vez de contra el promedio.
+Que el histórico permita retirar un 40% menos que el CAGR fijo es el punto central del proyecto: es el costo de planificar contra la peor secuencia posible en vez de contra el promedio. Ojo con la redacción: `brecha = 1 − histórico/fijo` es cuánto **menos** permite el histórico. Dicho desde el otro lado, el fijo permite un 66% **más** (6.172 / 3.706). Hasta el 13 de septiembre de 2026 la pantalla decía "el CAGR fijo permitiría retirar un 40% más", que era falso.
 
 ---
 

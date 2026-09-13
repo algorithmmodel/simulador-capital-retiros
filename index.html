@@ -896,7 +896,7 @@ function correr(){
     var necesario = invertido * (cfg.retBase / sost);
     var delta = invertido - necesario, sobra = delta >= 0;
     return '<div class="req">' +
-      '<div class="et">Capital requerido para ' + usd(cfg.retBase) + ' de retiro (de hoy)</div>' +
+      '<div class="et">Capital requerido para retirar ' + usd(cfg.retBase) + ' de hoy</div>' +
       '<div class="linea"><span class="nu">' + usd(necesario) + '</span>' +
       '<span class="delta ' + (sobra ? "exc" : "def") + '">' +
       (sobra ? "excedente de " : "déficit de ") + usd(Math.abs(delta)) + '</span></div></div>';
@@ -904,7 +904,7 @@ function correr(){
   function bloqueModo(clase, nombre, detalle, sost, tasa, extra){
     return '<div class="modo '+clase+'"><div class="nom">'+nombre+'</div>' +
       '<div class="det">'+detalle+'</div><div class="cifras">' +
-      '<div><div class="et">Retiro sostenible</div><div class="nu">'+(sost===null?"—":usd(sost))+'</div></div>' +
+      '<div><div class="et">Retiro sostenible (de hoy)</div><div class="nu">'+(sost===null?"—":usd(sost))+'</div></div>' +
       '<div><div class="et">'+(extra||"Éxito de su plan")+'</div><div class="nu">'+tasa+'</div></div>' +
       '</div>' + filaRequerido(sost) + '</div>';
   }
@@ -936,8 +936,11 @@ function correr(){
   $("kExito").textContent = pc0(tasaH);
   $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " de hoy por semestre desde " + etiquetaPeriodo(cfg.startP) +
     ". Con la inflación cargada, el primer retiro es de " + usd(cfg.retBase * cfg.acum[cfg.startP]) + ". " +
-    (brecha===null ? "" : "El CAGR fijo permitiría retirar un " + (brecha*100).toFixed(0) +
-     "% más que el histórico al " + Math.round(cfg.nivel*100) + "% de éxito: esa diferencia es el precio del seguro.");
+    /* brecha = 1 - histórico/fijo: es cuánto MENOS permite el histórico, no cuánto
+       más permite el fijo. Con 85.408 contra 185.016 da 54% menos; el fijo
+       permite 117% más. La redacción anterior decía "54% más", que es falso. */
+    (brecha===null ? "" : "Con el histórico al " + Math.round(cfg.nivel*100) + "% de éxito puede retirar un " +
+     (brecha*100).toFixed(0) + "% menos que con el CAGR fijo: esa diferencia es el precio del seguro.");
 
   /* El encabezado muestra el capital invertido, no el inicial: con aportes
      grandes, decir solo "1.000.000 iniciales" subrepresenta lo que se puso y
@@ -1136,13 +1139,13 @@ function itemsInforme(){
   it.push({tipo:"sub", texto:"Generado el "+new Date().toLocaleDateString("es-AR")+
     " · serie S&P 500 " + ANIO0 + "-" + ANIO_FIN + ", retornos totales"});
 
-  it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo"});
+  it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo (de hoy)"});
   it.push({tipo:"kv", k:"CAGR fijo "+pc(c.cagr), v: ultimo.sostDet===null?"No alcanzable":usd(ultimo.sostDet)});
   it.push({tipo:"kv", k:"Histórico, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostH===null?"No alcanzable":usd(ultimo.sostH)});
   it.push({tipo:"kv", k:"Monte Carlo, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostM===null?"No alcanzable":usd(ultimo.sostM)});
 
   if(c.retBase > 0){
-    it.push({tipo:"seccion", texto:"Capital requerido para " + usd(c.retBase) + " de retiro (de hoy)"});
+    it.push({tipo:"seccion", texto:"Capital requerido para retirar " + usd(c.retBase) + " de hoy"});
     [["CAGR fijo", ultimo.sostDet], ["Histórico", ultimo.sostH], ["Monte Carlo", ultimo.sostM]]
       .forEach(function(f){
         var v = "No alcanzable";
