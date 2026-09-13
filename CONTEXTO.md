@@ -72,18 +72,27 @@ Un retorno anual histórico se convierte en dos semestres iguales (`aSemestral`)
 | Modelo | Cómo arma `retornos` |
 |---|---|
 | CAGR fijo | `setConstante(cagr, anios)` — el mismo número en los 2n semestres. |
-| Backtest histórico | `ventanasHistoricas(anios)` — cada ventana consecutiva de la serie real. Con 97 años y horizonte 20 salen 78 ventanas. |
+| Backtest histórico | `ventanasHistoricas(anios)` — cada ventana consecutiva de la serie real. Con 98 años (1928–2025) y horizonte 20 salen 79 ventanas. |
 | Monte Carlo | `setsMonteCarlo(anios, corridas, bloque, seed)` — bootstrap por bloques: toma tramos consecutivos al azar (con wrap-around) para conservar la autocorrelación. |
 
 ### Serie de datos
 
-`SERIE` = retornos totales anuales del S&P 500 con dividendos reinvertidos, 1928–2024, en porcentaje. `ANIO0 = 1928`. CAGR implícito de la serie: 9,95%.
+`SERIE` = retornos totales anuales del S&P 500 con dividendos reinvertidos, 1928–2025, en porcentaje. `ANIO0 = 1928`. CAGR implícito de la serie: 10,03%.
 
-**La serie tiene dos tramos y conviene saberlo.** Verificada contra NYU Stern (Damodaran) el 2 de agosto de 2026: los 88 años de 1928 a 2015 coinciden con esa fuente al segundo decimal. Los 9 años de 2016 a 2024 **no** coinciden: son los retornos totales publicados del índice (18,40% en 2020, 28,71% en 2021, −18,11% en 2022, 26,29% en 2023, 25,02% en 2024), y Damodaran, que reconstruye la serie con su propio método, da entre 0,07 y 0,38 puntos menos en cada uno de esos años.
+**La serie tiene dos tramos y conviene saberlo.** Verificada contra NYU Stern (Damodaran) el 2 de agosto de 2026: los 88 años de 1928 a 2015 coinciden con esa fuente al segundo decimal. Los 10 años de 2016 a 2025 **no** coinciden: son los retornos totales publicados del índice (18,40% en 2020, 28,71% en 2021, −18,11% en 2022, 26,29% en 2023, 25,02% en 2024, 17,88% en 2025), y Damodaran, que reconstruye la serie con su propio método, da entre 0,07 y 0,38 puntos menos en cada uno de esos años (17,78% en 2025).
 
-Los valores que están en el archivo son los correctos para este proyecto, porque son los que replica un ETF como SPY. Se midió el efecto de la diferencia: mueve el capital final de las ventanas que llegan hasta 2016–2024 entre 0,2% y 1,5%, y no cambia ninguna conclusión —ni la tasa de éxito, ni el retiro sostenible, ni la mediana, ni cuáles son las peores ventanas—, porque las ventanas críticas (1928 y 1929) están en el tramo que coincide. **No "corregir" esos nueve años hacia los de Damodaran creyendo que están mal.**
+Los valores que están en el archivo son los correctos para este proyecto, porque son los que replica un ETF como SPY. Se midió el efecto de la diferencia: mueve el capital final de las ventanas que llegan hasta 2016–2024 entre 0,2% y 1,5%, y no cambia ninguna conclusión —ni la tasa de éxito, ni el retiro sostenible, ni la mediana, ni cuáles son las peores ventanas—, porque las ventanas críticas (1928 y 1929) están en el tramo que coincide. **No "corregir" esos años hacia los de Damodaran creyendo que están mal.**
 
-`SERIE_CPI` = inflación anual de EE.UU. en el mismo período y en el mismo orden, calculada como variación diciembre a diciembre sobre la serie CPIAUCNS de FRED (Reserva Federal de St. Louis). `SERIE_CPI[k]` es la inflación del año en que el mercado rindió `SERIE[k]`; **el orden tiene que seguir emparejado**. Acumula 18,2x en los 97 años: 3,04% anual.
+`SERIE_CPI` = inflación anual de EE.UU. en el mismo período y en el mismo orden, calculada como variación diciembre a diciembre sobre la serie CPIAUCNS de FRED (Reserva Federal de St. Louis). `SERIE_CPI[k]` es la inflación del año en que el mercado rindió `SERIE[k]`; **el orden tiene que seguir emparejado**. Acumula 18,7x en los 98 años: 3,04% anual.
+
+### Cómo agregar un año nuevo
+
+Se hace una vez por año, en enero o después. Son dos números y nada más: el año final que aparece en todos los textos se calcula solo (`ANIO_FIN`, `PERIODO`).
+
+1. **Retorno total del S&P 500 del año**, cierre a cierre, con dividendos. Tiene que ser la serie publicada del índice, no la de Damodaran (ver arriba). La tabla anual de la página de Wikipedia del S&P 500 usa ese criterio y coincide al segundo decimal con 2021–2024. **Cruzarlo** con el retorno de precio cierre a cierre de la serie `SP500` de FRED: la diferencia tiene que dar un dividendo razonable, entre 1,2 y 2 puntos. 2025 se cargó así: 16,39% de precio (FRED: 5.881,63 → 6.845,50) más 1,49 de dividendos = 17,88%.
+2. **Inflación del año**, diciembre contra diciembre, de la serie `CPIAUCNS` de FRED. 2025: 315,605 → 324,054 = 2,68%.
+3. Agregar cada número **al final** de `SERIE` y `SERIE_CPI`. Las dos listas tienen que quedar del mismo largo.
+4. Recalcular y reemplazar las tablas de referencia de la sección 9, porque suma una ventana y el Monte Carlo sortea sobre un conjunto distinto. Los valores del modelo de CAGR fijo **no** tienen que moverse: si se mueven, se tocó otra cosa.
 
 **Ojo:** son retornos *totales*, no de precio. Circulan tablas de retornos anuales que son de precio (2024 +23,31% en vez de +25,02%). No mezclar las dos.
 
@@ -123,7 +132,7 @@ El objetivo es un porcentaje del capital total invertido (nominal), configurable
 
 ## 8. Limitaciones conocidas (declaradas en la app)
 
-1. **Las ventanas históricas se solapan.** Con 97 años de datos, las ventanas de 20 años independientes son ~5, no 78. El porcentaje describe la historia disponible, no es una probabilidad. La UI dice "76 de 78 ventanas", no "97,4% de probabilidad".
+1. **Las ventanas históricas se solapan.** Con 98 años de datos, las ventanas de 20 años independientes son ~5, no 79. El porcentaje describe la historia disponible, no es una probabilidad. La UI dice "77 de 79 ventanas", no "97,5% de probabilidad".
 
 1bis. **Las bandas del abanico no son caminos.** Se calcula el percentil columna por columna, semestre a semestre, así que la línea de la mediana no es el recorrido de ninguna ventana real. Está aclarado abajo del gráfico; no sacarlo.
 2. **La inflación es constante salvo que se pida lo contrario.** Por defecto los tres modelos usan la inflación que carga el usuario, lo que aísla el riesgo de secuencia de retornos. El selector "Inflación en el backtest y el Monte Carlo" permite cambiarla por el IPC real de cada año, que es el escenario más realista y más exigente: con la configuración de referencia, el retiro sostenible histórico al 90% baja de 21.165 a 19.227.
@@ -148,15 +157,15 @@ Conviene además comprobar que todo `$("id")` usado en el JS tenga su elemento e
 
 El test de referencia de abajo compara el motor consigo mismo, así que no detecta un error conceptual. Para eso está esta prueba, que lo compara contra un resultado publicado por terceros.
 
-Caso canónico del Trinity Study: capital 1.000.000, retiro de 40.000 anuales (20.000 semestrales) ajustados por inflación desde el primer semestre, 30 años, sin aportes, objetivo 0% (éxito = no agotarse), cartera 100% acciones. Con 97 años de datos salen 68 ventanas.
+Caso canónico del Trinity Study: capital 1.000.000, retiro de 40.000 anuales (20.000 semestrales) ajustados por inflación desde el primer semestre, 30 años, sin aportes, objetivo 0% (éxito = no agotarse), cartera 100% acciones. Con 98 años de datos salen 69 ventanas.
 
 | | Resultado |
 |---|---|
-| Orden A, IPC real de cada año | 66 de 68 = **97,1%** |
-| Orden A, inflación constante 3% | 65 de 68 = **95,6%** |
-| Orden B, IPC real | 63 de 68 = 92,6% |
+| Orden A, IPC real de cada año | 67 de 69 = **97,1%** |
+| Orden A, inflación constante 3% | 66 de 69 = **95,7%** |
+| Orden B, IPC real | 64 de 69 = 92,8% |
 
-La literatura reporta entre 95% y 98% de éxito para 100% acciones a 30 años con retiro del 4%. El motor cae dentro de ese rango con el orden A, que es el de la app. Barrido de tasas con orden B: hasta 3,5% sobreviven las 68 ventanas, en 4% empieza a fallar, en 5% cae a 76,5%.
+La literatura reporta entre 95% y 98% de éxito para 100% acciones a 30 años con retiro del 4%. El motor cae dentro de ese rango con el orden A, que es el de la app. Barrido de tasas con orden B: hasta 3,5% sobreviven las 69 ventanas, en 4% empieza a fallar, en 5% cae a 76,8%.
 
 **Si esta prueba se aleja del rango 95–98%, hay un error conceptual en el motor**, aunque el test de referencia siga dando bien.
 
@@ -177,16 +186,18 @@ Al medir ese descuadre hay que normalizar por **el dinero total movido**, no por
 | Capital final CAGR fijo | 507.482 | 2.537.410 |
 | Sostenible CAGR fijo | 7.050 | 35.251 |
 | Sostenible histórico al 90% | 4.233 | 21.165 |
-| Sostenible Monte Carlo al 90% | 3.031 | 15.154 |
-| Éxito histórico | 76 de 78 (97,4%) | igual |
-| Éxito Monte Carlo | 92,4% | igual |
+| Sostenible Monte Carlo al 90% | 3.160 | 15.799 |
+| Éxito histórico | 77 de 79 (97,5%) | igual |
+| Éxito Monte Carlo | 92,9% | igual |
 | Peores arranques | 1929, 1928, 1930, 1999, 2000 | igual |
+
+Valores con la serie hasta **2025** (98 años), cargada el 13 de septiembre de 2026. Con la serie hasta 2024 eran: éxito histórico 76 de 78 (97,4%), Monte Carlo 92,4%, sostenible Monte Carlo 3.031. Los tres del modelo de CAGR fijo y el sostenible histórico no cambiaron, que es lo esperable: el año agregado es bueno y no toca la cola de peores ventanas, mientras que el Monte Carlo sortea sobre un conjunto distinto.
 
 **El modelo es lineal en los montos**: multiplicar capital, aportes y retiro por la misma constante multiplica todos los resultados en dinero por esa constante, y deja las tasas de éxito idénticas. La columna de la derecha es la configuración histórica de referencia del proyecto (capital 500.000, aportes 50.000, retiro 12.000) y sirve de comprobación cruzada: si los defaults ×5 no dan esa columna, el motor dejó de ser lineal y algo se rompió.
 
 Con los defaults pero el objetivo en **0%**, el sostenible con CAGR fijo tiene que dar **8.652** (43.258 en la escala ×5) y no agotar el capital. Ese caso es el que detecta si alguien volvió a sacar el chequeo de agotamiento de la búsqueda (ver sección 6).
 
-Con los defaults pero el selector de inflación en **IPC real de cada año**: éxito histórico 76 de 78, éxito Monte Carlo 93,0%, sostenible histórico al 90% **3.845** (19.227 ×5), sostenible Monte Carlo al 90% **3.040** (15.201 ×5). El CAGR fijo no se mueve, porque ese modelo siempre usa la inflación constante.
+Con los defaults pero el selector de inflación en **IPC real de cada año**: éxito histórico 77 de 79, éxito Monte Carlo 93,0%, sostenible histórico al 90% **3.845** (19.227 ×5), sostenible Monte Carlo al 90% **3.227** (16.136 ×5). El CAGR fijo no se mueve, porque ese modelo siempre usa la inflación constante.
 
 Y para el agotamiento con recuperación (sección 7): capital 100.000, retiro 40.000 desde el año 1 semestre 1, un único aporte de 2.000.000 en el año 10 semestre 2, 20 años, CAGR 9%, inflación 3%, orden A. El capital tiene que agotarse en **Año 2 / S1**, quedar en cero hasta el Año 10 / S1, y terminar en **2.929.876** con `agotado` en `true`. Si el capital final da 0, alguien repuso el `break`.
 

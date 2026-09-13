@@ -10,7 +10,7 @@ Corre **tres modelos con los mismos datos** y muestra los resultados juntos:
 | Modelo | Qué supone |
 |---|---|
 | **CAGR fijo** | El mercado rinde exactamente lo mismo todos los años. |
-| **Backtest histórico** | Cada ventana consecutiva del S&P 500 entre 1928 y 2024 (78 ventanas de 20 años). |
+| **Backtest histórico** | Cada ventana consecutiva del S&P 500 entre 1928 y 2025 (79 ventanas de 20 años). |
 | **Monte Carlo** | Bootstrap por bloques: tramos consecutivos de la historia real, sorteados. |
 
 La diferencia entre el primero y los otros dos es el punto del proyecto. Con la configuración por defecto, el modelo de CAGR fijo permite retirar un 40% más que el histórico exigiendo 90% de éxito. Esa diferencia es el costo de planificar contra la peor secuencia posible en vez de contra el promedio.
@@ -33,7 +33,7 @@ Es un archivo HTML autocontenido, sin dependencias, sin CDN y sin compilación. 
 
 ## Datos
 
-- **Retornos:** S&P 500 con dividendos reinvertidos, retornos totales anuales 1928–2024. Los años 1928–2015 coinciden exactamente con la serie de NYU Stern (Damodaran); 2016–2024 son los retornos totales publicados del índice, que difieren de la reconstrucción de Damodaran en menos de 0,4 puntos por año.
+- **Retornos:** S&P 500 con dividendos reinvertidos, retornos totales anuales 1928–2025. Los años 1928–2015 coinciden exactamente con la serie de NYU Stern (Damodaran); 2016–2025 son los retornos totales publicados del índice, que difieren de la reconstrucción de Damodaran en menos de 0,4 puntos por año.
 - **Inflación:** IPC de EE.UU., variación diciembre a diciembre, mismo período. Calculada sobre la serie `CPIAUCNS` de FRED (Reserva Federal de St. Louis).
 
 ## Limitaciones

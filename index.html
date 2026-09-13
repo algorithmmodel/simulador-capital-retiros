@@ -265,7 +265,7 @@
 
   <button type="button" id="calcular">Calcular los tres modelos</button>
 
-  <p class="nota">Serie de retornos totales del S&amp;P 500 con dividendos reinvertidos, 1928–2024 (NYU Stern). Datos y reglas de planificación de uso general. No es asesoramiento financiero. El rendimiento pasado no predice el futuro.</p>
+  <p class="nota">Serie de retornos totales del S&amp;P 500 con dividendos reinvertidos, <span id="periodoCarga">1928–2025</span>. Datos y reglas de planificación de uso general. No es asesoramiento financiero. El rendimiento pasado no predice el futuro.</p>
 </div>
 
 <div id="vistaRes" class="hidden">
@@ -372,7 +372,7 @@
     <button type="button" id="btnVolver">Volver a editar</button>
   </div>
 
-  <p class="nota" id="notaFinal">Serie del S&amp;P 500 1928–2024, retornos totales. No es asesoramiento financiero.</p>
+  <p class="nota" id="notaFinal">Serie del S&amp;P 500, retornos totales. No es asesoramiento financiero.</p>
 </div>
 
 <script>
@@ -395,13 +395,15 @@ var SERIE = [
  16.54,31.48,-3.06,30.23,7.49,9.97,1.33,37.20,22.68,33.10,
  28.34,20.89,-9.03,-11.85,-21.97,28.36,10.74,4.83,15.61,5.48,
  -36.55,25.94,14.82,2.10,15.89,32.15,13.52,1.38,11.96,21.83,
- -4.38,31.49,18.40,28.71,-18.11,26.29,25.02
+ -4.38,31.49,18.40,28.71,-18.11,26.29,25.02,17.88
 ];
 
 /* ===== Inflación anual de EE.UU., % (IPC, variación diciembre a diciembre) =====
-   Mismos 97 años que SERIE, en el mismo orden: SERIE_CPI[k] es la inflación del
+   Mismos años que SERIE, en el mismo orden: SERIE_CPI[k] es la inflación del
    año en que el mercado rindió SERIE[k]. Calculada sobre la serie CPIAUCNS de
-   FRED (Reserva Federal de St. Louis). Acumula 18,2x en el período: 3,04% anual. */
+   FRED (Reserva Federal de St. Louis). Hasta 2025 acumula 18,7x: 3,04% anual.
+   Para agregar un año: un número al final de cada lista, y nada más. El año
+   final que aparece en los textos se calcula solo (ANIO_FIN). */
 var SERIE_CPI = [
  -1.16,0.58,-6.40,-9.32,-10.27,0.76,1.52,2.99,1.45,2.86,
  -2.78,0.00,0.71,9.93,9.03,2.96,2.30,2.25,18.13,8.84,
@@ -412,8 +414,10 @@ var SERIE_CPI = [
  4.42,4.65,6.11,3.06,2.90,2.75,2.67,2.54,3.32,1.70,
  1.61,2.68,3.39,1.55,2.38,1.88,3.26,3.42,2.54,4.08,
  0.09,2.72,1.50,2.96,1.74,1.50,0.76,0.73,2.07,2.11,
- 1.91,2.29,1.36,7.04,6.45,3.35,2.89
+ 1.91,2.29,1.36,7.04,6.45,3.35,2.89,2.68
 ];
+var ANIO_FIN = ANIO0 + SERIE.length - 1;
+var PERIODO = ANIO0 + "–" + ANIO_FIN;
 
 /* ---------- formato ---------- */
 function usd(n){ if(!isFinite(n)) n=0; return "$" + Math.round(n).toLocaleString("en-US"); }
@@ -900,7 +904,7 @@ function correr(){
   $("modos").innerHTML =
     bloqueModo("d","CAGR fijo", pc(cfg.cagr)+" todos los años, sin variación",
       sostDet, simDet.agotado ? "Agotado" : (simDet.finalNominal>=objetivo?"Cumple":"No cumple"), "Su plan") +
-    bloqueModo("h","Backtest histórico", setsH.length+" ventanas reales de "+Math.ceil(cfg.anios)+" años (1928–2024)",
+    bloqueModo("h","Backtest histórico", setsH.length+" ventanas reales de "+Math.ceil(cfg.anios)+" años ("+PERIODO+")",
       sostH, okH+" de "+setsH.length+" ("+pc0(tasaH)+")") +
     bloqueModo("m","Monte Carlo", cfg.corridas+" corridas, bloques de "+cfg.bloque+" años",
       sostM, pc0(tasaM));
@@ -980,7 +984,7 @@ function correr(){
     ["Retorno nominal anual (modelo fijo)", pc(cfg.cagr)],
     ["Inflación anual", pc(cfg.infl)],
     ["Inflación en el backtest y el Monte Carlo",
-      usarCPI ? "IPC real de cada año (1928–2024)" : "Constante, " + pc(cfg.infl)],
+      usarCPI ? "IPC real de cada año (" + PERIODO + ")" : "Constante, " + pc(cfg.infl)],
     ["Retorno real anual (Fisher)", pc(real)],
     ["Retorno nominal semestral", pc(cfg.ts)],
     ["Inflación semestral", pc(cfg.is)],
@@ -1011,7 +1015,7 @@ function correr(){
     tb.appendChild(tr);
   });
 
-  $("notaFinal").textContent = "Serie del S&P 500 1928–2024, retornos totales. " + (usarCPI
+  $("notaFinal").textContent = "Serie del S&P 500 " + PERIODO + ", retornos totales. " + (usarCPI
     ? "El backtest y el Monte Carlo usan el IPC real de cada año; el modelo de CAGR fijo usa la inflación constante que cargó."
     : "La inflación se mantiene constante en los tres modelos: lo que varía es el orden de los retornos.") +
     " No es asesoramiento financiero.";
@@ -1122,7 +1126,7 @@ function itemsInforme(){
     (apPdf > 0 ? " ("+usd(c.capital)+" iniciales + "+usd(apPdf)+" en aportes)" : "") +
     " · "+c.anios+" años · objetivo "+c.targetPct+"% ("+usd(ultimo.objetivo)+")"});
   it.push({tipo:"sub", texto:"Generado el "+new Date().toLocaleDateString("es-AR")+
-    " · serie S&P 500 1928-2024, retornos totales"});
+    " · serie S&P 500 " + ANIO0 + "-" + ANIO_FIN + ", retornos totales"});
 
   it.push({tipo:"seccion", texto:"Retiro sostenible según el modelo"});
   it.push({tipo:"kv", k:"CAGR fijo "+pc(c.cagr), v: ultimo.sostDet===null?"No alcanzable":usd(ultimo.sostDet)});
@@ -1373,6 +1377,7 @@ window.addEventListener("resize", function(){
 crearFila($("filasAportes"),2,1,10000,"Monto USD");
 crearFila($("filasAportes"),3,1,10000,"Monto USD");
 crearFila($("filasAportes"),4,1,10000,"Monto USD");
+$("periodoCarga").textContent = PERIODO;
 refrescarVacios();
 validar();
 pintarComparacion();
