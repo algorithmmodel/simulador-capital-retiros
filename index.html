@@ -79,6 +79,7 @@
   .aviso{border:2px solid var(--rojo);border-radius:8px;background:#FFF;padding:12px 14px;
     margin-bottom:16px;font-size:15px;font-weight:600;color:var(--rojo)}
   .aviso ul{margin:8px 0 0;padding-left:20px;font-weight:400}
+  .aviso.nota{border-color:var(--naranja);color:var(--naranja)}
 
   .estado{border:3px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:18px;background:#FFF}
   .estado .tag{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
@@ -231,10 +232,10 @@
       <div class="field"><label for="retSem">Semestre de inicio</label>
         <select id="retSem"><option value="1">1</option><option value="2">2</option></select></div>
     </div>
-    <h2 style="margin-top:22px">Ajustes puntuales del retiro</h2>
+    <h2 style="margin-top:22px">Cambio de retiros</h2>
     <p class="hint" style="margin:-8px 0 12px">También en poder de compra actual.</p>
     <div class="filas" id="filasAjustes"></div>
-    <button class="ghost small" type="button" id="addAjuste">Agregar ajuste</button>
+    <button class="ghost small" type="button" id="addAjuste">Agregar cambio</button>
   </section>
 
   <section class="card">
@@ -475,6 +476,10 @@ function leerFilas(cont){
     var m = parseFloat(String(filas[i].querySelector(".f-monto").value).replace(",","."));
     if(!isFinite(a)||a<1) continue;
     if(!isFinite(m)) m = 0;
+    /* Una fila en $0 no hace nada: se ignora. La pantalla trae por defecto una
+       fila de aporte en $0 para completar, y agregar filas nunca tiene que
+       cambiar el resultado ni bloquear el cálculo. */
+    if(m === 0) continue;
     out.push({anio:a, sem:(s===2?2:1), monto:m, p:periodo(a,(s===2?2:1))});
   }
   out.sort(function(x,y){ return x.p-y.p; });
@@ -482,7 +487,7 @@ function leerFilas(cont){
 }
 function refrescarVacios(){
   [["filasAportes","Sin aportes cargados. Toque “Agregar aporte” si va a sumar capital nuevo."],
-   ["filasAjustes","Sin ajustes. El retiro sigue el monto inicial más inflación durante todo el período."]]
+   ["filasAjustes","Sin cambios. El retiro se mantiene igual durante todo el período."]]
   .forEach(function(par){
     var cont = $(par[0]), prev = cont.parentNode.querySelector(".empty");
     if(prev) prev.remove();
@@ -698,12 +703,17 @@ function validar(){
   if(!(vNivel >= 50 && vNivel <= 100)) errs.push("El nivel de éxito exigido tiene que estar entre 50% y 100%.");
   if(!(vCorr >= 200 && vCorr <= 5000)) errs.push("Las corridas de Monte Carlo tienen que estar entre 200 y 5.000.");
   if(!(vBloq >= 1 && vBloq <= 15)) errs.push("El tamaño del bloque tiene que estar entre 1 y 15 años.");
+  /* Aportes y cambios de retiro NUNCA bloquean el cálculo. Un aporte puede ir en
+     cualquier semestre, antes o después de empezar a retirar. Un cambio de
+     retiro anterior al primer retiro el motor lo ignora, así que tampoco se
+     avisa. Solo se deja una nota en naranja, sin bloquear, cuando una fila con
+     monto queda fuera del horizonte, porque suele ser un error de tipeo. */
+  var notas = [];
   c.aportes.forEach(function(a){
-    if(a.p > c.n) errs.push("El aporte de " + usd(a.monto) + " está en " + etiquetaPeriodo(a.p) + ", fuera del horizonte.");
+    if(a.p > c.n) notas.push("Se ignora el aporte de " + usd(a.monto) + " en " + etiquetaPeriodo(a.p) + ": queda fuera del horizonte.");
   });
   c.ajustes.forEach(function(a){
-    if(a.p > c.n) errs.push("El ajuste de retiro de " + usd(a.monto) + " está en " + etiquetaPeriodo(a.p) + ", fuera del horizonte.");
-    else if(a.p < c.startP) errs.push("El ajuste en " + etiquetaPeriodo(a.p) + " es anterior al primer retiro. No se aplica.");
+    if(a.p > c.n) notas.push("Se ignora el cambio de retiro de " + usd(a.monto) + " en " + etiquetaPeriodo(a.p) + ": queda fuera del horizonte.");
   });
 
   var box = $("avisos"); box.innerHTML = "";
@@ -712,6 +722,12 @@ function validar(){
     var ul = "<ul>"; errs.forEach(function(e){ ul += "<li>"+e+"</li>"; });
     d.innerHTML = "Revise lo siguiente antes de calcular:" + ul + "</ul>";
     box.appendChild(d);
+  }
+  if(notas.length){
+    var dn = document.createElement("div"); dn.className = "aviso nota";
+    var uln = "<ul>"; notas.forEach(function(e){ uln += "<li>"+e+"</li>"; });
+    dn.innerHTML = "Para tener en cuenta (no impide calcular):" + uln + "</ul>";
+    box.appendChild(dn);
   }
   $("calcular").disabled = errs.length > 0;
   $("calcular").style.opacity = errs.length ? .5 : 1;
@@ -1500,9 +1516,7 @@ window.addEventListener("resize", function(){
   }
 });
 
-crearFila($("filasAportes"),2,1,10000,"Monto USD");
-crearFila($("filasAportes"),3,1,10000,"Monto USD");
-crearFila($("filasAportes"),4,1,10000,"Monto USD");
+crearFila($("filasAportes"),2,1,0,"Monto USD");
 $("periodoCarga").textContent = PERIODO;
 /* Solo informativo, no entra en ningún cálculo: el CAGR nominal de la serie
    completa, para comparar contra el CAGR que carga el usuario. */
