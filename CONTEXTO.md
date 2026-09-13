@@ -59,7 +59,7 @@ Todo es **semestral**. Las tasas anuales se parten en mitades geométricas: `(1+
 
 ### Inflación
 
-`acum` es un array de `n+1` posiciones con el nivel de precios semestre a semestre: `acum[0] = 1` y `acum[i]` son los precios en el semestre `i`. El motor lo usa para dos cosas: indexar el retiro (`base * acum[i]/acum[baseP]`) y deflactar el capital (`cap/acum[i]`). Antes eran dos `Math.pow(1+is, ...)`, que solo funcionaban con inflación fija; con inflación constante el array da exactamente el mismo número, verificado contra los siete valores de referencia.
+`acum` es un array de `n+1` posiciones con el nivel de precios semestre a semestre: `acum[0] = 1` y `acum[i]` son los precios en el semestre `i`. El motor lo usa para dos cosas: indexar el retiro (`base * acum[i]`, porque el retiro se carga en dólares de hoy; ver sección 7) y deflactar el capital (`cap/acum[i]`). Antes eran dos `Math.pow(1+is, ...)`, que solo funcionaban con inflación fija; con inflación constante el array da exactamente el mismo número, verificado contra los siete valores de referencia.
 
 Esto es lo que permite elegir, con un selector en la pantalla de carga, si el backtest y el Monte Carlo usan **la inflación constante que cargó el usuario** (opción por defecto) o **el IPC real de cada año**. El modelo de CAGR fijo usa siempre la constante. En Monte Carlo el bootstrap sortea **índices de año**, no retornos sueltos, así que el retorno y la inflación que entran a una corrida son los del mismo año: eso conserva la correlación entre inflación alta y retorno malo, que es justamente lo que hace peligrosas a las ventanas de los años setenta.
 
@@ -126,13 +126,15 @@ El objetivo es un porcentaje del capital total invertido (nominal), configurable
 - **Compartir** usa `navigator.share()` con cadena de respaldo: clipboard API → `execCommand` → textarea visible para copiar a mano. Siempre da respuesta visible.
 - **Nomenclatura de tasas.** Se muestran las cuatro por separado y con nombre completo: retorno nominal anual, inflación anual, retorno real anual (Fisher), retorno nominal semestral, inflación semestral. Antes decía solo "Tasa semestral" al lado del retorno real y se leía como contradicción. No volver a abreviar.
 - **El gráfico de trade-off (retiro sostenible vs objetivo de legado) fue eliminado a pedido.** No reponerlo sin que lo pida.
+- **Los retiros se cargan en dólares de hoy.** Desde el 13 de septiembre de 2026. El monto del retiro y el de cada ajuste se interpretan como poder de compra actual, y en cada semestre sale `monto * acum[i]`: lo que hoy son 90.000 llevado por la inflación hasta ese semestre. Antes el monto se tomaba en dólares del momento del primer retiro y la indexación arrancaba ahí, lo cual era una incoherencia —se suponía inflación para los años posteriores al primer retiro pero no para los anteriores— y además engañaba: con el primer retiro a tres años, "90.000" compraba lo que hoy compran 82.364. La interfaz lo dice en el rótulo ("USD de hoy"), en el resultado ("Retirando $90,000 de hoy… el primer retiro es de $98,345") y en el capital requerido. Los retiros sostenibles también quedan en dólares de hoy, en la misma moneda que el retiro planteado, así que la comparación es directa. La tabla semestre a semestre y el total retirado siguen en nominal, porque muestran los dólares que efectivamente salen de la cuenta. **No volver a indexar desde el primer retiro.**
+- **Línea verde bajo los campos de retorno e inflación.** Muestra el CAGR nominal de la serie completa (10,03% con datos hasta 2025) como referencia para comparar con el CAGR cargado. Es solo informativa: no entra en ningún cálculo. Se calcula al cargar la página desde `SERIE`, así que se actualiza sola al agregar un año.
 - **El agotamiento no corta la simulación.** El motor recorre siempre los `n` semestres. Si el capital llega a cero, los períodos siguientes quedan en cero con retiro cero, pero un aporte posterior lo recupera y los retiros se reanudan. `agotado` se marca con el período del **primer** agotamiento y no se limpia nunca, así que el plan sigue siendo un fracaso para `exitoso()` aunque termine con capital. Antes había un `break`: los aportes posteriores se perdían y `totalAportado` los ignoraba, mientras que `invertido` —que define el objetivo de capital final— sí los contaba. Era una comparación contra un objetivo que incluía plata que el modelo nunca había sumado. La tabla pinta en rojo el semestre del agotamiento y los que quedan en cero, no todo lo que viene después.
 
 ---
 
 ## 8. Limitaciones conocidas (declaradas en la app)
 
-1. **Las ventanas históricas se solapan.** Con 98 años de datos, las ventanas de 20 años independientes son ~5, no 79. El porcentaje describe la historia disponible, no es una probabilidad. La UI dice "77 de 79 ventanas", no "97,5% de probabilidad".
+1. **Las ventanas históricas se solapan.** Con 98 años de datos, las ventanas de 20 años independientes son ~5, no 79. El porcentaje describe la historia disponible, no es una probabilidad. La UI dice "76 de 79 ventanas", no "96,2% de probabilidad".
 
 1bis. **Las bandas del abanico no son caminos.** Se calcula el percentil columna por columna, semestre a semestre, así que la línea de la mediana no es el recorrido de ninguna ventana real. Está aclarado abajo del gráfico; no sacarlo.
 2. **La inflación es constante salvo que se pida lo contrario.** Por defecto los tres modelos usan la inflación que carga el usuario, lo que aísla el riesgo de secuencia de retornos. El selector "Inflación en el backtest y el Monte Carlo" permite cambiarla por el IPC real de cada año, que es el escenario más realista y más exigente: con la configuración de referencia, el retiro sostenible histórico al 90% baja de 21.165 a 19.227.
@@ -161,11 +163,13 @@ Caso canónico del Trinity Study: capital 1.000.000, retiro de 40.000 anuales (2
 
 | | Resultado |
 |---|---|
-| Orden A, IPC real de cada año | 67 de 69 = **97,1%** |
+| Orden A, IPC real de cada año | 66 de 69 = **95,7%** |
 | Orden A, inflación constante 3% | 66 de 69 = **95,7%** |
 | Orden B, IPC real | 64 de 69 = 92,8% |
 
-La literatura reporta entre 95% y 98% de éxito para 100% acciones a 30 años con retiro del 4%. El motor cae dentro de ese rango con el orden A, que es el de la app. Barrido de tasas con orden B: hasta 3,5% sobreviven las 69 ventanas, en 4% empieza a fallar, en 5% cae a 76,8%.
+La literatura reporta entre 95% y 98% de éxito para 100% acciones a 30 años con retiro del 4%. El motor cae dentro de ese rango con el orden A, que es el de la app. Barrido de tasas con orden B: hasta 3,5% sobreviven las 69 ventanas, en 4% empieza a fallar, en 5% cae a 78,3%.
+
+Con los retiros en dólares de hoy (desde el 13 de septiembre de 2026) el primer retiro del caso canónico sale medio año indexado, así que la tasa efectiva es algo mayor al 4%: el orden A con IPC real bajó de 97,1% a 95,7%. Sigue dentro del rango publicado.
 
 **Si esta prueba se aleja del rango 95–98%, hay un error conceptual en el motor**, aunque el test de referencia siga dando bien.
 
@@ -183,23 +187,23 @@ Al medir ese descuadre hay que normalizar por **el dinero total movido**, no por
 
 | | Con los defaults | La misma configuración ×5 |
 |---|---|---|
-| Capital final CAGR fijo | 507.482 | 2.537.410 |
-| Sostenible CAGR fijo | 7.050 | 35.251 |
-| Sostenible histórico al 90% | 4.233 | 21.165 |
-| Sostenible Monte Carlo al 90% | 3.160 | 15.799 |
-| Éxito histórico | 77 de 79 (97,5%) | igual |
-| Éxito Monte Carlo | 92,9% | igual |
+| Capital final CAGR fijo | 479.765 | 2.398.826 |
+| Sostenible CAGR fijo | 6.172 | 30.860 |
+| Sostenible histórico al 90% | 3.706 | 18.529 |
+| Sostenible Monte Carlo al 90% | 2.766 | 13.831 |
+| Éxito histórico | 76 de 79 (96,2%) | igual |
+| Éxito Monte Carlo | 91,6% | igual |
 | Peores arranques | 1929, 1928, 1930, 1999, 2000 | igual |
 
-Valores con la serie hasta **2025** (98 años), cargada el 13 de septiembre de 2026. Con la serie hasta 2024 eran: éxito histórico 76 de 78 (97,4%), Monte Carlo 92,4%, sostenible Monte Carlo 3.031. Los tres del modelo de CAGR fijo y el sostenible histórico no cambiaron, que es lo esperable: el año agregado es bueno y no toca la cola de peores ventanas, mientras que el Monte Carlo sortea sobre un conjunto distinto.
+Valores vigentes desde el **13 de septiembre de 2026**: serie hasta 2025 (98 años) y retiros en dólares de hoy. Los sostenibles están en dólares de hoy. Historial, por si hace falta rastrear un cambio: con la serie hasta 2024 y retiros en dólares del primer retiro eran 507.482 · 7.050 · 4.233 · 3.031 · 76 de 78 · 92,4%; al agregar 2025 (mismo criterio de retiro) pasaron a 507.482 · 7.050 · 4.233 · 3.160 · 77 de 79 · 92,9%.
 
 **El modelo es lineal en los montos**: multiplicar capital, aportes y retiro por la misma constante multiplica todos los resultados en dinero por esa constante, y deja las tasas de éxito idénticas. La columna de la derecha es la configuración histórica de referencia del proyecto (capital 500.000, aportes 50.000, retiro 12.000) y sirve de comprobación cruzada: si los defaults ×5 no dan esa columna, el motor dejó de ser lineal y algo se rompió.
 
-Con los defaults pero el objetivo en **0%**, el sostenible con CAGR fijo tiene que dar **8.652** (43.258 en la escala ×5) y no agotar el capital. Ese caso es el que detecta si alguien volvió a sacar el chequeo de agotamiento de la búsqueda (ver sección 6).
+Con los defaults pero el objetivo en **0%**, el sostenible con CAGR fijo tiene que dar **7.574** (37.870 en la escala ×5) y no agotar el capital. Ese caso es el que detecta si alguien volvió a sacar el chequeo de agotamiento de la búsqueda (ver sección 6).
 
-Con los defaults pero el selector de inflación en **IPC real de cada año**: éxito histórico 77 de 79, éxito Monte Carlo 93,0%, sostenible histórico al 90% **3.845** (19.227 ×5), sostenible Monte Carlo al 90% **3.227** (16.136 ×5). El CAGR fijo no se mueve, porque ese modelo siempre usa la inflación constante.
+Con los defaults pero el selector de inflación en **IPC real de cada año**: éxito histórico 78 de 79, éxito Monte Carlo 91,9%, sostenible histórico al 90% **3.119** (15.594 ×5), sostenible Monte Carlo al 90% **2.834** (14.171 ×5). El CAGR fijo no se mueve, porque ese modelo siempre usa la inflación constante.
 
-Y para el agotamiento con recuperación (sección 7): capital 100.000, retiro 40.000 desde el año 1 semestre 1, un único aporte de 2.000.000 en el año 10 semestre 2, 20 años, CAGR 9%, inflación 3%, orden A. El capital tiene que agotarse en **Año 2 / S1**, quedar en cero hasta el Año 10 / S1, y terminar en **2.929.876** con `agotado` en `true`. Si el capital final da 0, alguien repuso el `break`.
+Y para el agotamiento con recuperación (sección 7): capital 100.000, retiro 40.000 desde el año 1 semestre 1, un único aporte de 2.000.000 en el año 10 semestre 2, 20 años, CAGR 9%, inflación 3%, orden A. El capital tiene que agotarse en **Año 2 / S1**, quedar en cero hasta el Año 10 / S1, y terminar en **2.899.899** con `agotado` en `true`. Si el capital final da 0, alguien repuso el `break`.
 
 Los 40% de diferencia entre el CAGR fijo y el histórico son el punto central del proyecto: es el costo de planificar contra la peor secuencia posible en vez de contra el promedio.
 
@@ -209,12 +213,12 @@ Los 40% de diferencia entre el CAGR fijo y el histórico son el punto central de
 
 El botón "Guardar este escenario para comparar", en la pantalla de resultados, agrega el escenario a una tabla comparativa que se muestra en las dos vistas: columnas los escenarios, filas los conceptos (capital, horizonte, retiro planteado, los tres retiros sostenibles, las dos tasas de éxito y el capital final). Tope de 6.
 
-Se guarda **solo el resumen**, no la simulación entera: alcanza para comparar y entra en `localStorage` sin problema. Si el navegador tiene `localStorage` bloqueado (Safari en navegación privada), cae a una variable en memoria y la comparación sigue funcionando dentro de la sesión, aunque se pierda al cerrar. Clave: `carg_escenarios_v1`. Si se cambian los campos del resumen, subir la versión de la clave para no leer datos viejos con forma distinta.
+Se guarda **solo el resumen**, no la simulación entera: alcanza para comparar y entra en `localStorage` sin problema. Si el navegador tiene `localStorage` bloqueado (Safari en navegación privada), cae a una variable en memoria y la comparación sigue funcionando dentro de la sesión, aunque se pierda al cerrar. Clave: `carg_escenarios_v2`. Si cambian los campos del resumen **o lo que significan**, subir la versión de la clave para no mezclar datos viejos. Se subió a v2 cuando los retiros pasaron a dólares de hoy: los escenarios guardados antes quedan fuera de la tabla.
 
 ## 11. Ideas pendientes (ninguna aprobada)
 
 - **Mostrar los tramos del retiro sostenible cuando hay ajustes cargados.** Planteado el 2 de agosto de 2026 y postergado. `escala` multiplica el retiro base **y todos los ajustes**, así que el sostenible escala la forma del plan completa. Con un plan de tres tramos —50.000 desde el año 2, 100.000 desde el 6, 90.000 desde el 10— y un factor histórico de 1,28, la pantalla muestra solo `$63.982`, cuando el plan sostenible real es 63.982 → 127.964 → 115.168. Leído aislado, ese número se interpreta como "puede retirar 63.982 por semestre durante todo el horizonte", que es falso. La solución acordada: una línea con los tres tramos debajo del sostenible, visible **solo si hay ajustes cargados**.
-- **Aclarar el rótulo del campo de ajustes.** Hoy dice "Nuevo retiro USD" y la sección se llama "Ajustes puntuales del retiro". Un ajuste **reemplaza** el retiro anterior y reinicia la indexación desde esa fecha; no se suma al anterior. La palabra "ajuste" invita a leerlo como monto adicional. Candidatos: cambiar el rótulo a "Pasa a retirar USD", o agregar una línea de ayuda con "reemplaza el retiro anterior; para sumar, cargue el monto total".
+- **Aclarar el rótulo del campo de ajustes.** Hoy dice "Nuevo retiro USD de hoy" y la sección se llama "Ajustes puntuales del retiro". Un ajuste **reemplaza** el retiro anterior desde esa fecha; no se suma al anterior. La palabra "ajuste" invita a leerlo como monto adicional. Candidatos: cambiar el rótulo a "Pasa a retirar USD", o agregar una línea de ayuda con "reemplaza el retiro anterior; para sumar, cargue el monto total".
 - Pasar el escenario por la querystring, para compartir un caso por link.
 - Web Worker para el cálculo, si crece la cantidad de corridas.
 - Exportar CSV de la tabla semestral.

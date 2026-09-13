@@ -35,6 +35,7 @@
     border-radius:var(--radius);padding:18px 16px;margin-bottom:18px}
   label{display:block;font-size:15px;font-weight:600;margin:0 0 6px}
   .hint{font-size:14px;color:var(--ink-2);font-weight:400;margin-top:5px}
+  .dato-serie{font-size:16px;font-weight:700;color:var(--verde);margin:-4px 0 2px}
   input[type=number],input[type=text],select{
     width:100%;height:48px;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;
     padding:0 12px;color:var(--ink);background:#FFFFFF;
@@ -186,6 +187,7 @@
         <input id="infl" type="number" inputmode="decimal" value="3" min="0" step="0.1">
       </div>
     </div>
+    <p class="dato-serie" id="histSerie"></p>
     <p class="hint" id="hintReal"></p>
     <p class="hint">El CAGR solo alimenta el modelo determinístico. Los otros dos usan la serie histórica del S&amp;P 500.</p>
 
@@ -206,9 +208,9 @@
   <section class="card">
     <h2>Retiros</h2>
     <div class="field">
-      <label for="retMonto">Retiro semestral inicial (USD)</label>
+      <label for="retMonto">Retiro semestral (USD de hoy)</label>
       <input id="retMonto" type="number" inputmode="decimal" value="2400" min="0" step="500">
-      <p class="hint">Se ajusta por inflación cada semestre desde el primer retiro.</p>
+      <p class="hint">En dólares de hoy. Cada retiro se ajusta por la inflación acumulada hasta ese semestre, así compra siempre lo mismo.</p>
     </div>
     <div class="grid2">
       <div class="field"><label for="retAnio">Año de inicio</label>
@@ -484,13 +486,18 @@ function refrescarVacios(){
    período del PRIMER agotamiento y no se limpia nunca, así que el plan sigue
    contando como fracaso en `exitoso()` aunque termine con capital.
    Antes se cortaba con un break: los aportes posteriores se perdían, mientras
-   que el objetivo de capital final sí los contaba. */
+   que el objetivo de capital final sí los contaba.
+
+   Los retiros se cargan EN DÓLARES DE HOY (el retiro base y los ajustes). En
+   cada semestre i salen `base * A[i]` dólares: el monto de hoy llevado por la
+   inflación hasta ese semestre, así que siempre compran lo mismo. Antes el
+   monto se tomaba en dólares del primer retiro y la indexación arrancaba ahí:
+   con el primer retiro a tres años, "90.000" compraba lo que hoy 82.364. */
 function simular(cfg, retornos, escala, acum){
   var n = cfg.n, A = acum || cfg.acum;
   var cap = cfg.capital, totalRet = 0, totalAp = 0;
   var agotado = false, pAgot = null, serie = [];
   var base = (cfg.retBase > 0 ? cfg.retBase : 1) * escala;
-  var baseP = cfg.startP;
 
   for(var i=1;i<=n;i++){
     var ap = 0, a;
@@ -500,8 +507,8 @@ function simular(cfg, retornos, escala, acum){
     var ret = 0;
     if(i >= cfg.startP){
       for(var j=0;j<cfg.ajustes.length;j++)
-        if(cfg.ajustes[j].p === i){ base = cfg.ajustes[j].monto * escala; baseP = i; }
-      ret = base * (A[i] / A[baseP]);
+        if(cfg.ajustes[j].p === i) base = cfg.ajustes[j].monto * escala;
+      ret = base * A[i];
     }
     var r = retornos[i-1];
     if(orden === "A"){
@@ -889,7 +896,7 @@ function correr(){
     var necesario = invertido * (cfg.retBase / sost);
     var delta = invertido - necesario, sobra = delta >= 0;
     return '<div class="req">' +
-      '<div class="et">Capital requerido para ' + usd(cfg.retBase) + ' de retiro</div>' +
+      '<div class="et">Capital requerido para ' + usd(cfg.retBase) + ' de retiro (de hoy)</div>' +
       '<div class="linea"><span class="nu">' + usd(necesario) + '</span>' +
       '<span class="delta ' + (sobra ? "exc" : "def") + '">' +
       (sobra ? "excedente de " : "déficit de ") + usd(Math.abs(delta)) + '</span></div></div>';
@@ -918,16 +925,17 @@ function correr(){
       " nominales sin agotar el capital. Baje el objetivo o suba el capital inicial.";
   } else {
     $("kSost").textContent = usd(sostDet);
-    $("kSostN").textContent = "Es el primer retiro. El último llega a " +
-      usd(sostDet * Math.pow(1+cfg.is, Math.max(0, nRet-1))) +
-      " nominales por la indexación. Usted planteó " + usd(cfg.retBase) + ".";
+    $("kSostN").textContent = "En dólares de hoy. Con la inflación cargada, el primer retiro sería de " +
+      usd(sostDet * cfg.acum[cfg.startP]) + " y el último de " + usd(sostDet * cfg.acum[cfg.n]) +
+      ". Usted planteó " + usd(cfg.retBase) + " de hoy.";
   }
 
   var brecha = (sostDet!==null && sostH!==null && sostDet>0) ? (1 - sostH/sostDet) : null;
   /* el color acompaña al estado: en verde solo si el plan pasa los dos modelos */
   $("kExitoBox").className = "kpi " + (cls === "ok" ? "verde" : cls === "warn" ? "naranja" : "rojo");
   $("kExito").textContent = pc0(tasaH);
-  $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " por semestre desde " + etiquetaPeriodo(cfg.startP) + ". " +
+  $("kExitoN").textContent = "Retirando " + usd(cfg.retBase) + " de hoy por semestre desde " + etiquetaPeriodo(cfg.startP) +
+    ". Con la inflación cargada, el primer retiro es de " + usd(cfg.retBase * cfg.acum[cfg.startP]) + ". " +
     (brecha===null ? "" : "El CAGR fijo permitiría retirar un " + (brecha*100).toFixed(0) +
      "% más que el histórico al " + Math.round(cfg.nivel*100) + "% de éxito: esa diferencia es el precio del seguro.");
 
@@ -1041,7 +1049,7 @@ function textoResumen(){
     "Horizonte: " + c.anios + " años · Inflación: " + pc(c.infl) + "\n" +
     "Capital total invertido: " + usd2(ultimo.invertido) + "\n" +
     "Objetivo de capital final: " + usd2(ultimo.objetivo) + " (" + c.targetPct + "%)\n" +
-    "Retiro planteado: " + usd2(c.retBase) + " desde " + etiquetaPeriodo(c.startP) + "\n\n" +
+    "Retiro planteado: " + usd2(c.retBase) + " de hoy desde " + etiquetaPeriodo(c.startP) + "\n\n" +
     "RETIRO SOSTENIBLE\n" +
     "  CAGR fijo " + pc(c.cagr) + ": " + (ultimo.sostDet===null?"no alcanzable":usd2(ultimo.sostDet)) + "\n" +
     "  Histórico al " + Math.round(c.nivel*100) + "%: " + (ultimo.sostH===null?"no alcanzable":usd2(ultimo.sostH)) + "\n" +
@@ -1134,7 +1142,7 @@ function itemsInforme(){
   it.push({tipo:"kv", k:"Monte Carlo, al "+Math.round(c.nivel*100)+"% de éxito", v: ultimo.sostM===null?"No alcanzable":usd(ultimo.sostM)});
 
   if(c.retBase > 0){
-    it.push({tipo:"seccion", texto:"Capital requerido para " + usd(c.retBase) + " de retiro"});
+    it.push({tipo:"seccion", texto:"Capital requerido para " + usd(c.retBase) + " de retiro (de hoy)"});
     [["CAGR fijo", ultimo.sostDet], ["Histórico", ultimo.sostH], ["Monte Carlo", ultimo.sostM]]
       .forEach(function(f){
         var v = "No alcanzable";
@@ -1148,7 +1156,7 @@ function itemsInforme(){
 
   it.push({tipo:"seccion", texto:"Su plan"});
   it.push({tipo:"destacado", k:"PROBABILIDAD DE ÉXITO (HISTÓRICO)", v: pc0(ultimo.tasaH),
-    n: ultimo.okH+" de "+ultimo.nH+" ventanas llegaron al objetivo retirando "+usd(c.retBase)+" por semestre."});
+    n: ultimo.okH+" de "+ultimo.nH+" ventanas llegaron al objetivo retirando "+usd(c.retBase)+" de hoy por semestre."});
   it.push({tipo:"kv", k:"Éxito Monte Carlo", v: pc0(ultimo.tasaM)});
 
   it.push({tipo:"seccion", texto:"Capital final nominal en las ventanas históricas"});
@@ -1215,7 +1223,9 @@ function itemsInforme(){
    Se guarda solo el resumen, no la simulación entera: alcanza para comparar y
    entra de sobra en localStorage. Si el navegador lo tiene bloqueado (Safari en
    navegación privada), la comparación sigue funcionando dentro de la sesión. */
-var CLAVE = "carg_escenarios_v1";
+/* v2: desde que los retiros se cargan en dólares de hoy. Los escenarios
+   guardados con v1 tenían los retiros en otra moneda y no se mezclan. */
+var CLAVE = "carg_escenarios_v2";
 var enMemoria = [];
 function leerGuardados(){
   try{ var s = localStorage.getItem(CLAVE); return s ? JSON.parse(s) : enMemoria; }
@@ -1239,7 +1249,7 @@ function resumenEscenario(){
 var FILAS_COMP = [
   ["Capital inicial",            function(e){ return usd(e.capital); }],
   ["Horizonte",                  function(e){ return e.anios + " años"; }],
-  ["Retiro planteado",           function(e){ return usd(e.retBase) + " desde " + etiquetaPeriodo(e.startP); }],
+  ["Retiro planteado (de hoy)",  function(e){ return usd(e.retBase) + " desde " + etiquetaPeriodo(e.startP); }],
   ["Objetivo de capital final",  function(e){ return usd(e.objetivo) + " (" + e.targetPct + "%)"; }],
   ["CAGR e inflación",           function(e){ return pc(e.cagr) + " / " + pc(e.infl); }],
   ["Inflación histórica",        function(e){ return e.cpi ? "IPC real" : "constante"; }],
@@ -1286,7 +1296,7 @@ function copiarViejo(t){
 }
 
 $("addAporte").addEventListener("click", function(){ crearFila($("filasAportes"),2,1,0,"Monto USD"); refrescarVacios(); validar(); });
-$("addAjuste").addEventListener("click", function(){ crearFila($("filasAjustes"),2,1,0,"Nuevo retiro USD"); refrescarVacios(); validar(); });
+$("addAjuste").addEventListener("click", function(){ crearFila($("filasAjustes"),2,1,0,"Nuevo retiro USD de hoy"); refrescarVacios(); validar(); });
 $("target").addEventListener("input", function(){ $("tNum").value=$("target").value; actualizarTarget(leerCfg()); });
 $("target").addEventListener("change", function(){ fijarTarget(parseInt($("target").value,10)); });
 $("tNum").addEventListener("input", function(){
@@ -1378,6 +1388,10 @@ crearFila($("filasAportes"),2,1,10000,"Monto USD");
 crearFila($("filasAportes"),3,1,10000,"Monto USD");
 crearFila($("filasAportes"),4,1,10000,"Monto USD");
 $("periodoCarga").textContent = PERIODO;
+/* Solo informativo, no entra en ningún cálculo: el CAGR nominal de la serie
+   completa, para comparar contra el CAGR que carga el usuario. */
+var cagrSerie = Math.pow(SERIE.reduce(function(p,v){ return p*(1+v/100); }, 1), 1/SERIE.length) - 1;
+$("histSerie").textContent = "Histórico del S&P 500 " + PERIODO + ": " + pc(cagrSerie) + " anual.";
 refrescarVacios();
 validar();
 pintarComparacion();
